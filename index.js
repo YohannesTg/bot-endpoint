@@ -18,7 +18,6 @@ app.post('/telegram', (req, res) => {
   const chatId = jsonData.message.chat.id;
   const message = 'Hello from your Telegram bot!';
   bot.sendMessage(chatId, message);
-  fetch("https://api.telegram.org/bot7004677225:AAEvp1tFSgiIXkQqkCp5mkB6tRScWhcdnAs/setWebhook?url=https://telegame.vercel.app/telegram");
   res.sendStatus(200); // Send a success response
 });
 
