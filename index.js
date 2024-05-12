@@ -1,17 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const TelegramBot = require('node-telegram-bot-api');
+const { Bot } = require('node-telegram-bot-api-wrapper');
 
 const app = express();
 app.use(bodyParser.json());
 
 // Set up your bot token
 const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
-const bot = new TelegramBot(botToken, { polling: false });
+const bot = new Bot(botToken);
 
 app.post('/telegram', (req, res) => {
   const jsonData = req.body;
- const inlineQueryId = jsonData.inline_query.id;
+  const inlineQueryId = jsonData.inline_query.id;
 
   // Create the inline keyboard with the game button and URL
   const inlineKeyboard = {
@@ -30,15 +30,7 @@ app.post('/telegram', (req, res) => {
     type: 'game',
     id: '1',
     game_short_name: 'GuessGm',
-    reply_markup: {inline_keyboard: [
-      [
-        {
-          text: 'Play Game',
-          url: 'https://google.com' // Replace with your game URL
-        }
-      ]
-    ]
-    }
+    reply_markup: JSON.stringify(inlineKeyboard)
   };
 
   // Send the Inline Query Result Game with the inline keyboard to the user
@@ -50,3 +42,6 @@ app.post('/telegram', (req, res) => {
 app.listen(8443, () => {
   console.log('Express server is running on port 8443');
 });
+
+// Start the bot
+bot.startPolling();
