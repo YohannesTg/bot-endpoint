@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Set up your bot token
-const botToken = 'YOUR_BOT_TOKEN';
+const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
 const bot = new TelegramBot(botToken, { polling: false });
 
 app.post('/telegram', (req, res) => {
