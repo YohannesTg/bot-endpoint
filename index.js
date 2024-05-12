@@ -29,13 +29,20 @@ app.post('/telegram', (req, res) => {
   const inlineQueryResultGame = {
     type: 'game',
     id: '1',
-    game_short_name: 'GuessGm'
+    game_short_name: 'GuessGm',
+    reply_markup: {inline_keyboard: [
+      [
+        {
+          text: 'Play Game',
+          url: 'https://google.com' // Replace with your game URL
+        }
+      ]
+    ]
+    }
   };
 
   // Send the Inline Query Result Game with the inline keyboard to the user
-  bot.answerInlineQuery(inlineQueryId, [inlineQueryResultGame], {
-    reply_markup: JSON.stringify(inlineKeyboard)
-  });
+  bot.answerInlineQuery(inlineQueryId, [inlineQueryResultGame]);
 
   res.sendStatus(200); // Send a success response
 });
