@@ -7,7 +7,7 @@ app.use(bodyParser.json());
 
 // Set up your bot token
 const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
-const bot = new TelegramBot(botToken, { polling: false });
+const bot = new TelegramBot(botToken, { polling: true });
 
 app.post('/telegram', (req, res) => {
   const jsonData = req.body;
