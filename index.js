@@ -6,35 +6,41 @@ const app = express();
 app.use(bodyParser.json());
 
 // Set up your bot token
-const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
+const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I'; // Replace with your bot token
 const bot = new TelegramBot(botToken, { polling: false });
 
 app.post('/telegram', (req, res) => {
-const jsonData = req.body;
-const inlineQueryId = jsonData.inline_query.id;
+  const jsonData = req.body;
+  const inlineQueryId = jsonData.inline_query.id;
 
-// Create the Inline Query Result Game
-const inlineQueryResultGame = {
-type: 'game',
-id: '1',
-game_short_name: 'GuessGm',
-reply_markup: {inline_keyboard: [
-[
-{
-text: 'Play Game',
-url: 'https://google.com' // Replace with your game URL
-}
-]
-]
-}
-};
+  // Create the Inline Query Result Game
+  const inlineQueryResultGame = {
+    type: 'game',
+    id: '1',
+    game_short_name: 'GuessGm',
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {
+            text: 'Play Game',
+            url: 'https://google.com' // Replace with your game URL
+          }
+        ]
+      ]
+    })
+  };
 
-// Send the Inline Query Result Game with the inline keyboard to the user
-bot.answerInlineQuery(inlineQueryId, [inlineQueryResultGame]);
-
-res.sendStatus(200); // Send a success response
+  // Send the Inline Query Result Game with the inline keyboard to the user
+  bot.answerInlineQuery(inlineQueryId, [inlineQueryResultGame])
+    .then(() => {
+      res.sendStatus(200); // Send a success response
+    })
+    .catch((error) => {
+      console.error(error);
+      res.sendStatus(500); // Send an error response
+    });
 });
 
 app.listen(8443, () => {
-console.log('Express server is running on port 8443');
+  console.log('Express server is running on port 8443');
 });
