@@ -1,12 +1,18 @@
 const express = require('express');
-const app = express();
-const port = 3000;
+const bodyParser = require('body-parser');
 
-app.get('/', (req, res) => {
-  console.log('Request received');
-  res.send('Hello World!');
+const app = express();
+app.use(bodyParser.json());
+
+app.post('/telegram', (req, res) => {
+  const jsonData = req.body;
+  console.log(jsonData); // Add this line to log the JSON data
+  // Process the JSON data from the Telegram bot
+  // ...
+
+  res.sendStatus(200); // Send a success response
 });
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+app.listen(3000, () => {
+  console.log('Express server is running on port 3000');
 });
