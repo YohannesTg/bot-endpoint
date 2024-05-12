@@ -12,9 +12,8 @@ const bot = new TelegramBot(botToken, { polling: false });
 app.post('/telegram', (req, res) => {
   const jsonData = req.body;
   const chatId = jsonData.message.chat.id;
-  const message = jsonData.message.text; // Get the text of the received message
 
-  // Create the inline keyboard with the game button
+  // Create the inline keyboard with the game button and URL
   const inlineKeyboard = {
     inline_keyboard: [
       [
@@ -26,8 +25,15 @@ app.post('/telegram', (req, res) => {
     ]
   };
 
-  // Send the game with the inline keyboard to the user
-  bot.sendGame(chatId, 'GuessGm', {
+  // Create the Inline Query Result Game
+  const inlineQueryResultGame = {
+    type: 'game',
+    id: '1',
+    game_short_name: 'GuessGm'
+  };
+
+  // Send the Inline Query Result Game with the inline keyboard to the user
+  bot.answerInlineQuery(chatId, [inlineQueryResultGame], {
     reply_markup: JSON.stringify(inlineKeyboard)
   });
 
