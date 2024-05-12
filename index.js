@@ -14,21 +14,21 @@ app.post('/telegram', (req, res) => {
   const chatId = jsonData.message.chat.id;
   const message = jsonData.message.text; // Get the text of the received message
 
-  // Create an inline keyboard with a button
-  const keyboard = {
+  // Create the inline keyboard with the game button
+  const inlineKeyboard = {
     inline_keyboard: [
       [
         {
-          text: 'Click me',
-          callback_data: 'button_clicked'
+          text: 'Play Game',
+          url: 'https://google.com' // Replace with your game URL
         }
       ]
     ]
   };
 
-  // Send the received message back to the user with the inline keyboard
-  bot.sendMessage(chatId, message, {
-    reply_markup: JSON.stringify(keyboard)
+  // Send the game with the inline keyboard to the user
+  bot.sendGame(chatId, 'GuessGm', {
+    reply_markup: JSON.stringify(inlineKeyboard)
   });
 
   res.sendStatus(200); // Send a success response
