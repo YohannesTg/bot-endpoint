@@ -13,18 +13,6 @@ app.post('/telegram', (req, res) => {
 const jsonData = req.body;
 const inlineQueryId = jsonData.inline_query.id;
 
-// Create the inline keyboard with the game button and URL
-const inlineKeyboard = {
-inline_keyboard: [
-[
-{
-text: 'Play Game',
-url: 'https://google.com' // Replace with your game URL
-}
-]
-]
-};
-
 // Create the Inline Query Result Game
 const inlineQueryResultGame = {
 type: 'game',
