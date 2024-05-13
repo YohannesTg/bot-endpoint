@@ -37,15 +37,13 @@ bot.on('inline_query', async (ctx) => {
   // Create an inline keyboard
 
   // Create an inline game
-  const inlineKeyboard = Markup.inlineKeyboard([
-  Markup.button.url('Play Game', 'tg://google.com')
-]);
 
    const game = {
     type: 'game',
     id: '2',
     game_short_name: 'GuessGm',
-    reply_markup: inlineKeyboard,
+    reply_markup: Markup.inlineKeyboard([
+  Markup.button.url('Play Game', 'tg://google.com')]);,
   };
   
   // Answer the inline query with an inline keyboard and game
