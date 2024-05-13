@@ -9,30 +9,28 @@ app.use(bodyParser.json());
 const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
 const bot = new Telegraf(botToken);
 
-bot.on('text', (ctx) => {
-  const jsonData = ctx.update.message;
-  const chatId = jsonData.chat.id;
-  const message = jsonData.text; // Get the text of the received message
+// Set up the webhook URL
+const webhookUrl = 'telegame.vercel.app';
 
-  // Create an inline keyboard with a button
-  const keyboard = {
-    inline_keyboard: [
-      [
-        {
-          text: 'Click me',
-          callback_data: 'button_clicked'
-        }
-      ]
-    ]
-  };
-
-  // Send the received message back to the user with the inline keyboard
-  ctx.reply(message, {
-    reply_markup: JSON.stringify(keyboard)
-  });
+// Set up the webhook route
+app.post(`/webhook/${botToken}`, (req, res) => {
+  bot.handleUpdate(req.body);
+  res.sendStatus(200);
 });
 
-bot.launch();
+// Set the webhook
+bot.telegram.setWebhook(webhookUrl);
+
+// Start the bot
+bot.startWebhook(`/webhook/${botToken}`, null, 8443);
+
+// Handle incoming text messages
+bot.on('text', (ctx) => {
+  const message = ctx.message.text;
+  
+  // Reply to the user's message
+  ctx.reply(`You said: ${message}`);
+});
 
 app.listen(8443, () => {
   console.log('Express server is running on port 8443');
