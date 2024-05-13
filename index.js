@@ -46,7 +46,7 @@ const keyboard = Markup.inlineKeyboard([
     type: 'game',
     id: '2',
     game_short_name: 'GuessGm',
-    reply_markup: keyboard
+    reply_markup: {inline_keyboard: [{text: "Play Game", url: "tg://google.com"}]},
   };
   
   // Answer the inline query with an inline keyboard and game
