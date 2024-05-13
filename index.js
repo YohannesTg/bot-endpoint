@@ -10,7 +10,7 @@ const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
 const bot = new Telegraf(botToken);
 
 // Set up the webhook URL
-const webhookUrl = 'web url
+const webhookUrl = 'g-game.wuaze.com'
 // Set up the webhook route
 app.post(`/webhook/${botToken}`, (req, res) => {
   bot.handleUpdate(req.body);
