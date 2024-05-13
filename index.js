@@ -35,11 +35,7 @@ bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
   
   // Create an inline keyboard
-  const inlineKeyboard = Markup.inlineKeyboard([
-    Markup.button.callback('Button 1', 'button1'),
-    Markup.button.callback('Button 2', 'button2'),
-  ]);
-  
+
   // Create an inline game
   const inlineGame = Markup.inlineKeyboard([
   Markup.button.url('Play Game', 'https://google.com')
@@ -47,15 +43,6 @@ bot.on('inline_query', async (ctx) => {
   
   // Answer the inline query with an inline keyboard and game
   await ctx.answerInlineQuery([
-    {
-      type: 'article',
-      id: '1',
-      title: 'Inline Keyboard',
-      input_message_content: {
-        message_text: 'This is an inline keyboard example',
-      },
-      reply_markup: inlineKeyboard,
-    },
     {
       type: 'game',
       id: '2',
