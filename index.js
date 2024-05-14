@@ -43,20 +43,17 @@ const keyboard = Markup.inlineKeyboard([
 
   // Create an inline game
 const game = {
-  type: 'article',
+  type: 'game',
   id: '2',
-  title: 'Inline Keyboard',
-  input_message_content: {
-        message_text: 'This is an inline keyboard example',
-},
-  reply_markup: {
+  game_short_name: 'GuessGm',
+  reply_markup : JSON.stringify({
     inline_keyboard: [
       [
         { text: "Play This Game", url: "tg://google.com" }
       ]
     ]
   }
-};
+)};
   
   // Answer the inline query with an inline keyboard and game
   await ctx.answerInlineQuery([game]);
