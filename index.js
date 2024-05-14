@@ -43,9 +43,12 @@ const keyboard = Markup.inlineKeyboard([
 
   // Create an inline game
 const game = {
-  type: 'game',
+  type: 'article',
   id: '2',
-  game_short_name: 'GuessGm',
+  title: 'Inline Keyboard',
+  input_message_content: {
+        message_text: 'This is an inline keyboard example',
+},
   reply_markup: {
     inline_keyboard: [
       [
