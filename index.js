@@ -48,7 +48,14 @@ bot.on('inline_query', async (ctx) => {
       input_message_content: {
         message_text: 'Button Text',
       },
-      reply_markup: keyboard,
+      reply_markup: JSON.stringify({
+            inline_keyboard: [
+[
+{ text: "Play This Game", url: "tg://google.com" }
+]
+]
+}
+)};,
     }
   ]);
 });
