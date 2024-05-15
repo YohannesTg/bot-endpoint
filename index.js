@@ -10,9 +10,9 @@ const botToken = '7004677225:AAH_qVX9NO0CRxpMnw0t1Jz52ez9HqunN9I';
 const bot = new Telegraf(botToken);
 
 // Set up the webhook URL
-const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`
+const webhookUrl = `https://your-webhook-url.com/${botToken}`
 // Set up the webhook route
-app.post(`/webhook/${botToken}`, (req, res) => {
+app.post(`/${botToken}`, (req, res) => {
   bot.handleUpdate(req.body);
   res.sendStatus(200);
 });
@@ -21,7 +21,7 @@ app.post(`/webhook/${botToken}`, (req, res) => {
 bot.telegram.setWebhook(webhookUrl);
 
 // Start the bot
-bot.startWebhook(`/webhook/${botToken}`, null, 8443);
+bot.startWebhook(`/${botToken}`, null, 8443);
 
 // Handle incoming text messages
 bot.on('text', (ctx) => {
@@ -35,30 +35,23 @@ bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
   
   // Create an inline keyboard
-
-  // Create an inline game
-const keyboard = Markup.inlineKeyboard([
-    Markup.button.url("Play Game", "tg://google.com")
+  const keyboard = Markup.inlineKeyboard([
+    Markup.button.callback("Button Text", "button_data")
   ]);
 
-  // Create an inline game
-const game = {
-  type: 'game',
-  id: '2',
-  game_short_name: 'GuessGm',
-  reply_markup : JSON.stringify({
-    inline_keyboard: [
-      [
-        { text: "Play This Game", url: "tg://google.com" }
-      ]
-    ]
-  }
-)};
-  
-  // Answer the inline query with an inline keyboard and game
-  await ctx.answerInlineQuery([game]);
+  // Answer the inline query with an inline keyboard
+  await ctx.answerInlineQuery([
+    {
+      type: 'article',
+      id: '1',
+      title: 'Button Title',
+      input_message_content: {
+        message_text: 'Button Text',
+      },
+      reply_markup: keyboard,
+    }
+  ]);
 });
-
 
 app.listen(8443, () => {
   console.log('Express server is running on port 8443');
