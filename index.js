@@ -33,31 +33,30 @@ bot.on('text', (ctx) => {
 
 bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
-
+  
   // Create an inline keyboard
-  const keyboard = Markup.inlineKeyboard([
-    Markup.button.callback("Button Text", "button_data")
+
+  // Create an inline game
+const keyboard = Markup.inlineKeyboard([
+    Markup.button.url("Play Game", "tg://google.com")
   ]);
 
-  // Answer the inline query with an inline keyboard
-  await ctx.answerInlineQuery([
-    {
-      type: 'article',
-      id: '1',
-      title: 'Button Title',
-      input_message_content: {
-        message_text: 'Button Text',
-      },
-      reply_markup: JSON.stringify({
-            inline_keyboard: [
-[
-{ text: "Play This Game", url: "tg://google.com" }
-]
-]
-}
-)};,
-    }
-  ]);
+  // Create an inline game
+const game = {
+  type: 'game',
+  id: '2',
+  game_short_name: 'GuessGm',
+  reply_markup : JSON.stringify({
+    inline_keyboard: [
+      [
+        { text: "Play This Game", url: "tg://google.com" }
+      ]
+    ]
+  }
+)};
+  
+  // Answer the inline query with an inline keyboard and game
+  await ctx.answerInlineQuery([game]);
 });
 
 
