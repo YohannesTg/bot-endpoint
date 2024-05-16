@@ -24,32 +24,33 @@ bot.telegram.setWebhook(webhookUrl);
 bot.startWebhook(`/webhook/${botToken}`, null, 8443);
 
 // Handle incoming text messages
-bot.on('text', (ctx) => {
-  const message = ctx.message.text;
-  
-  // Reply to the user's message
-  ctx.reply(`You said: ${message}`);
-});
-
 bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
-  
-  // Create an inline keyboard
 
-  // Create an inline game
-const keyboard = Markup.inlineKeyboard([
-    Markup.button.url("Play Game", "tg://google.com")
-  ]);
+  // Check if the callback query is for the "Play Game" button
+  if (ctx.callbackQuery && ctx.callbackQuery.data === 'play_game') {
+    // Answer the callback query with a game URL
+    await ctx.answerCallbackQuery({
+      url: 'https://example.com/game-url'
+    });
+  } else {
+    // Create an inline keyboard
+    const keyboard = Markup.inlineKeyboard([
+      Markup.button.callback("Play Game", "play_game")
+    ]);
 
-  // Create an inline game
- const game = {
-    type: 'game',
-    id: '2',
-    game_short_name: 'GuessGm',
-  };
-  
-  // Answer the inline query with an inline keyboard and game
-  await ctx.answerInlineQuery([game]);
+    // Create an inline game
+    const game = {
+      type: 'game',
+      id: '2',
+      game_short_name: 'GuessGm',
+    };
+
+    // Answer the inline query with an inline keyboard and game
+    await ctx.answerInlineQuery([game], {
+      reply_markup: keyboard,
+    });
+  }
 });
 
 
