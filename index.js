@@ -34,11 +34,12 @@ bot.on('inline_query', async (ctx) => {
   const game = {
     type: 'game',
     id: '2',
-    game_short_name: 'GuessGm'
+    game_short_name: 'GuessGm',
+    reply_markup: keyboard
   };
 
   // Answer the inline query with an inline keyboard and game
-  await ctx.answerInlineQuery([game], { reply_markup: keyboard });
+  await ctx.answerInlineQuery([game]);
 });
 
 
