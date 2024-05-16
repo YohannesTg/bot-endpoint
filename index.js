@@ -47,9 +47,13 @@ bot.on('inline_query', async (ctx) => {
     };
 
     // Answer the inline query with an inline keyboard and game
-    await ctx.answerInlineQuery([game], {
-      reply_markup: keyboard,
-    });
+await ctx.answerInlineQuery([game], {
+  reply_markup: JSON.stringify({
+    inline_keyboard: [
+      [{ text: "Play this game", url: "http://g-game.wuaze.com" }]
+    ]
+  })
+})
   }
 });
 
