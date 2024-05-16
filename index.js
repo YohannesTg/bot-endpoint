@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Telegraf, Markup } = require('telegraf');
+const { Telegraf, Markup, ExtraMarkup } = require('telegraf');
 
 const app = express();
 app.use(bodyParser.json());
@@ -44,8 +44,8 @@ bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
 
   // Create an inline game
-  const keyboard = Markup.inlineKeyboard([
-    Markup.button.url("Play Game", "tg://google.com")
+  const keyboard = ExtraMarkup.inlineKeyboard([
+    ExtraMarkup.button.url("Play Game", "tg://google.com")
   ]);
   const game = {
     type: 'game',
