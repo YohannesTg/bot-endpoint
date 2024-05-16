@@ -41,21 +41,21 @@ bot.command("inline", (ctx) => {
     });
 });
 bot.on('inline_query', async (ctx) => {
-  const query = ctx.inlineQuery.query;
+const query = ctx.inlineQuery.query;
 
-  // Create an inline game
-  const keyboard = ExtraMarkup.inlineKeyboard([
-    ExtraMarkup.button.url("Play Game", "tg://google.com")
-  ]);
-  const game = {
-    type: 'game',
-    id: '2',
-    game_short_name: 'GuessGm',
-    reply_markup: keyboard
-  };
+// Create an inline game
+const keyboard = Markup.inlineKeyboard([
+Markup.button.url("Play Game", "tg://google.com")
+]);
+const game = {
+type: 'game',
+id: '2',
+game_short_name: 'GuessGm',
+reply_markup: keyboard
+};
 
-  // Answer the inline query with an inline keyboard and game
-  await ctx.answerInlineQuery([game]);
+// Answer the inline query with an inline keyboard and game
+await ctx.ExtraAnswerInlineQuery([game]);
 });
 
 
