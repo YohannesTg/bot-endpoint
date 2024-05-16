@@ -27,34 +27,18 @@ bot.startWebhook(`/webhook/${botToken}`, null, 8443);
 bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
 
-  // Check if the callback query is for the "Play Game" button
-  if (ctx.callbackQuery && ctx.callbackQuery.data === 'play_game') {
-    // Answer the callback query with a game URL
-    await ctx.answerCallbackQuery({
-      url: 'https://example.com/game-url'
-    });
-  } else {
-    // Create an inline keyboard
-    const keyboard = Markup.inlineKeyboard([
-      Markup.button.callback("Play Game", "play_game")
-    ]);
+  // Create an inline game
+  const keyboard = Markup.inlineKeyboard([
+    Markup.button.url("Play Game", "tg://google.com")
+  ]);
+  const game = {
+    type: 'game',
+    id: '2',
+    game_short_name: 'GuessGm'
+  };
 
-    // Create an inline game
-    const game = {
-      type: 'game',
-      id: '2',
-      game_short_name: 'GuessGm',
-    };
-
-    // Answer the inline query with an inline keyboard and game
-await ctx.answerInlineQuery([game], {
-  reply_markup: JSON.stringify({
-    inline_keyboard: [
-      [{ text: "Play this game", url: "http://g-game.wuaze.com" }]
-    ]
-  })
-})
-  }
+  // Answer the inline query with an inline keyboard and game
+  await ctx.answerInlineQuery([game], { reply_markup: keyboard });
 });
 
 
