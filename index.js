@@ -41,23 +41,38 @@ bot.command("inline", (ctx) => {
     });
 });
 bot.on('inline_query', async (ctx) => {
-const query = ctx.inlineQuery.query;
+  const query = ctx.inlineQuery.query;
 
-// Create an inline game
-const keyboard = Markup.inlineKeyboard([
-Markup.button.url("Play Game", "tg://google.com")
-]);
-const game = {
-type: 'game',
-id: '2',
-game_short_name: 'GuessGm',
-reply_markup: {inline_keyboard: [[{text: "Play Game" ,url: "tg://google.com"}]]},
-};
+  // Create an inline game button
+  const gameButton = Markup.button.game('Play Game');
 
-// Answer the inline query with an inline keyboard and game
-await ctx.answerInlineQuery([game]);
+  // Create an inline keyboard with a link button
+  const inlineKeyboard = Markup.inlineKeyboard([
+    [Markup.button.url('Visit Website', 'https://example.com')]
+  ]);
+
+  // Create a game message
+  const gameMessage = {
+    type: 'game',
+    id: '2',
+    game_short_name: 'GuessGm',
+    reply_markup: inlineKeyboard
+  };
+
+  // Create an array of results
+  const results = [
+    {
+      type: 'article',
+      id: '1',
+      title: 'Play Game',
+      input_message_content: gameMessage,
+      reply_markup: Markup.inlineKeyboard([[gameButton]])
+    }
+  ];
+
+  // Answer the inline query with the game button
+  await ctx.answerInlineQuery(results);
 });
-
 
 
 app.listen(8443, () => {
