@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Telegraf, Markup, ExtraMarkup } = require('telegraf');
+const { Telegraf, Markup} = require('telegraf');
 
 const app = express();
 app.use(bodyParser.json());
@@ -40,40 +40,31 @@ bot.command("inline", (ctx) => {
         }
     });
 });
-bot.on('inline_query', async (ctx) => {
-  const query = ctx.inlineQuery.query;
+bot.on('inline_query', (ctx) => {  
+  return ctx.answerInlineQuery([replyInline('a')])
+})
 
-  // Create an inline game button
-  const gameButton = Markup.button.game('Play Game');
+function replyButton( plot ) {  
+ return Telegraf.Extra
+    .markup((m) =>
+      m.inlineKeyboard([
+          m.callbackButton('Plot', plot)
+      ])
+  );
+}
 
-  // Create an inline keyboard with a link button
-  const inlineKeyboard = Markup.inlineKeyboard([
-    [Markup.button.url('Visit Website', 'https://example.com')]
-  ]);
-
-  // Create a game message
-  const gameMessage = {
-    type: 'game',
-    id: '2',
-    game_short_name: 'GuessGm',
-    reply_markup: inlineKeyboard
-  };
-
-  // Create an array of results
-  const results = [
-    {
-      type: 'article',
-      id: '1',
-      title: 'Play Game',
-      input_message_content: gameMessage,
-      reply_markup: Markup.inlineKeyboard([[gameButton]])
-    }
-  ];
-
-  // Answer the inline query with the game button
-  await ctx.answerInlineQuery(results);
-});
-
+function replyInline( data ) {
+  return {
+    id: data,
+    title: data,
+    type: 'article',
+    input_message_content: {
+      message_text: '*REPLY INLINE*',
+      parse_mode: 'Markdown'
+    },
+    reply_markup: replyButton('test').reply_markup
+  }
+}
 
 app.listen(8443, () => {
   console.log('Express server is running on port 8443');
