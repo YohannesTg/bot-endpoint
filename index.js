@@ -60,6 +60,13 @@ bot.on('inline_query', (ctx) => {
   // Send the inline query results back to the user
   return ctx.answerInlineQuery([game]);
 });
+bot.on('callback_query', async (ctx) => {
+  const gameUrl = 'tg://g-game.wuaze.com';
+  const callbackQueryId = ctx.callbackQuery.id;
+
+  // Answer the callback query with the game URL
+  await ctx.answerCallbackQuery(callbackQueryId, gameUrl);
+});
 
 app.listen(8443, () => {
   console.log('Express server is running on port 8443');
