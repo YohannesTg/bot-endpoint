@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Telegraf, Markup, Extra} = require('telegraf');
+const { InlineKeyboardMarkup } = require('telegraf/typings/markup');
 
 const app = express();
 app.use(bodyParser.json());
@@ -46,11 +47,9 @@ bot.on('inline_query', (ctx) => {
         type: "game",
         id: "234",
         game_short_name: "GuessGm",
-        reply_markup: Extra.markup((markup) => {
-            return markup.inlineKeyboard([
-                markup.callbackButton("Play", "tg://google.com")
-            ]);
-        })
+        reply_markup: new InlineKeyboardMarkup([
+            [{ text: "Play", callback_game: {} }]
+        ])
     };
     return ctx.answerInlineQuery([game]);
 });
