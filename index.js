@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Telegraf, Markup} = require('telegraf');
+const { Telegraf, Markup, Types} = require('telegraf');
 
 const app = express();
 app.use(bodyParser.json());
@@ -40,31 +40,20 @@ bot.command("inline", (ctx) => {
         }
     });
 });
-bot.on('inline_query', (ctx) => {  
-  return ctx.answerInlineQuery([replyInline('a')])
-})
 
-function replyButton( plot ) {  
- return Telegraf.Extra
-    .markup((m) =>
-      m.inlineKeyboard([
-          m.callbackButton('Plot', plot)
-      ])
-  );
-}
-
-function replyInline( data ) {
-  return {
-    id: data,
-    title: data,
-    type: 'article',
-    input_message_content: {
-      message_text: '*REPLY INLINE*',
-      parse_mode: 'Markdown'
-    },
-    reply_markup: replyButton('test').reply_markup
-  }
-}
+bot.on('inline_query', (ctx) => {
+    const game = {
+        type: "game",
+        id: "234",
+        game_short_name: "GuessGm",
+        reply_markup: Extra.markup((markup) => {
+            return markup.inlineKeyboard([
+                markup.callbackButton("Play", "tg://google.com")
+            ]);
+        })
+    };
+    return ctx.answerInlineQuery([game]);
+});
 
 app.listen(8443, () => {
   console.log('Express server is running on port 8443');
