@@ -61,7 +61,7 @@ bot.on('inline_query', (ctx) => {
   return ctx.answerInlineQuery([game]);
 });
 bot.on('callback_query', async (ctx) => {
-  const gameUrl = 'tg://g-game.wuaze.com';
+  const gameUrl = 'http://g-game.wuaze.com';
   const callbackQueryId = ctx.callbackQuery.id;
 
   // Answer the callback query with the game URL
