@@ -43,23 +43,17 @@ bot.command("inline", (ctx) => {
 });
 
 bot.on('inline_query', (ctx) => {
-  const article = {
-    type: 'article',
+  const game = {
+    type: 'game',
     id: '1',
-    title: 'Your Article Title',
-    description: 'Your Article Description',
-    input_message_content: {
-      message_text: 'Your Article Content',
-    },
+    game_short_name: 'GuessGm',
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Button 1', callback_data: 'btn-1' }, { text: 'Button 2', callback_data: 'btn-2' }],
-        [{ text: 'Next', callback_data: 'next' }],
-        [{ text: 'Open in browser', url: 'telegraf.js.org' }],
+        [{ text: 'Play Now', callback_game: {} }],
       ],
     },
   };
-  return ctx.answerInlineQuery([article]);
+  return ctx.answerInlineQuery([game]);
 });
 
 app.listen(8443, () => {
