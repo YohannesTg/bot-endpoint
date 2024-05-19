@@ -49,7 +49,7 @@ bot.on('inline_query', (ctx) => {
     game_short_name: 'GuessGm',
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Play Now', callback_game: {} }],
+        [{ text: 'Play Now', url: "tg://g-game.wuaze.com/" }],
       ],
     },
   };
