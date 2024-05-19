@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const { Telegraf, Markup} = require('telegraf');
 
-const { InlineKeyboardMarkup } = require('telegraf/typings/markup');
 
 const app = express();
 app.use(bodyParser.json());
