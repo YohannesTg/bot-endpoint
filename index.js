@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Telegraf, Markup, Extra} = require('telegraf');
+
 const { InlineKeyboardMarkup } = require('telegraf/typings/markup');
 
 const app = express();
@@ -43,24 +43,23 @@ bot.command("inline", (ctx) => {
 });
 
 bot.on('inline_query', (ctx) => {
-    const game = {
-        type: "game",
-        id: "234",
-        game_short_name: "GuessGm",
-        reply_markup: {
-            inline_keyboard: [
-                /* Inline buttons. 2 side-by-side */
-                [ { text: "Button 1", callback_data: "btn-1" }, { text: "Button 2", callback_data: "btn-2" } ],
-
-                /* One button */
-                [ { text: "Next", callback_data: "next" } ],
-                
-                /* Also, we can have URL buttons. */
-                [ { text: "Open in browser", url: "telegraf.js.org" } ]
-            ]
-        }
-    };
-    return ctx.answerInlineQuery([game]);
+  const article = {
+    type: 'article',
+    id: '1',
+    title: 'Your Article Title',
+    description: 'Your Article Description',
+    input_message_content: {
+      message_text: 'Your Article Content',
+    },
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Button 1', callback_data: 'btn-1' }, { text: 'Button 2', callback_data: 'btn-2' }],
+        [{ text: 'Next', callback_data: 'next' }],
+        [{ text: 'Open in browser', url: 'telegraf.js.org' }],
+      ],
+    },
+  };
+  return ctx.answerInlineQuery([article]);
 });
 
 app.listen(8443, () => {
