@@ -47,9 +47,18 @@ bot.on('inline_query', (ctx) => {
         type: "game",
         id: "234",
         game_short_name: "GuessGm",
-        reply_markup: new InlineKeyboardMarkup([
-            [{ text: "Play", callback_game: {} }]
-        ])
+        reply_markup: {
+            inline_keyboard: [
+                /* Inline buttons. 2 side-by-side */
+                [ { text: "Button 1", callback_data: "btn-1" }, { text: "Button 2", callback_data: "btn-2" } ],
+
+                /* One button */
+                [ { text: "Next", callback_data: "next" } ],
+                
+                /* Also, we can have URL buttons. */
+                [ { text: "Open in browser", url: "telegraf.js.org" } ]
+            ]
+        }
     };
     return ctx.answerInlineQuery([game]);
 });
