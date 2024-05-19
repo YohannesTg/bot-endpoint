@@ -65,7 +65,7 @@ bot.on('callback_query', async (ctx) => {
   const callbackQueryId = ctx.callbackQuery.id;
 
   // Answer the callback query with the game URL
-  await ctx.answerCallbackQuery(callbackQueryId, gameUrl);
+  await ctx.answerCbQuery(gameUrl);
 });
 
 app.listen(8443, () => {
