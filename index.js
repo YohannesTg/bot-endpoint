@@ -43,6 +43,9 @@ bot.command("inline", (ctx) => {
 });
 
 bot.on('inline_query', (ctx) => {
+  const query = ctx.inlineQuery.query; // Access the query string from the context object
+
+  // Generate the inline query results
   const game = {
     type: 'game',
     id: '1',
@@ -53,6 +56,8 @@ bot.on('inline_query', (ctx) => {
       ],
     },
   };
+
+  // Send the inline query results back to the user
   return ctx.answerInlineQuery([game]);
 });
 
