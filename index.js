@@ -65,7 +65,8 @@ bot.on('callback_query', async (ctx) => {
   const callbackQueryId = ctx.callbackQuery.id;
   const userId = ctx.callbackQuery.from.id;
   const chatId = ctx.callbackQuery.chat_instance;
-  const gameUrl = `https://yohanz.com.et/index.php?userId=${userId}&chatId=${chatId}`;
+  const userName = ctx.callbackQuery.from.first_name;
+  const gameUrl = `https://yohanz.com.et/index.php?userId=${userId}&chatId=${chatId}&userName=${userName}`;
 
   console.log(`User ID: ${userId}`);
   console.log(`Chat ID: ${chatId}`);
