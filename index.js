@@ -61,7 +61,7 @@ bot.on('inline_query', (ctx) => {
   return ctx.answerInlineQuery([game]);
 });
 bot.on('callback_query', async (ctx) => {
-  const gameUrl = 'https://yohanz.com.et/';
+  const gameUrl = `https://yohanz.com.et/index.php?userId=${userId}&chatId=${chatId}`;
   const callbackQueryId = ctx.callbackQuery.id;
   const userId = ctx.callbackQuery.from.id;
   const chatId = ctx.callbackQuery.chat_instance;
