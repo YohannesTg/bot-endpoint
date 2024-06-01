@@ -66,7 +66,7 @@ bot.on('callback_query', async (ctx) => {
   const userId = ctx.callbackQuery.from.id;
   const chatId = ctx.callbackQuery.chat_instance;
   const userName = ctx.callbackQuery.from.first_name;
-  const gameUrl = `https://gamechecker.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
+  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
 
   console.log(`User ID: ${userId}`);
   console.log(`Chat ID: ${chatId}`);
