@@ -5,11 +5,11 @@ const { Telegraf, Markup } = require('telegraf');
 const app = express();
 app.use(bodyParser.json());
 
-// Set up your bot token
+// Use environment variables for security
 const botToken = '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
 const bot = new Telegraf(botToken);
 
-// Webhook URL
+// Webhook URL (change to your actual deployed domain)
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
 
 // Set up the webhook route
@@ -34,8 +34,8 @@ bot.command("inline", (ctx) => {
     });
 });
 
-// Handle inline query for game
-bot.on('inline_query', (ctx) => {
+// Handle inline query for the game
+bot.on('inline_query', async (ctx) => {
   const game = {
     type: 'game',
     id: '1',
@@ -49,7 +49,7 @@ bot.on('inline_query', (ctx) => {
   return ctx.answerInlineQuery([game]);
 });
 
-// Handle callback queries
+// Handle callback queries (Game launch)
 bot.on('callback_query', async (ctx) => {
   const userId = ctx.callbackQuery.from.id;
   const chatId = ctx.callbackQuery.chat_instance;
@@ -59,11 +59,8 @@ bot.on('callback_query', async (ctx) => {
   console.log(`User ID: ${userId}`);
   console.log(`Chat ID: ${chatId}`);
 
-  await ctx.answerCallbackQuery({gameUrl});
-});
+  // Answer the callback query first
+  await ctx.answerCbQuery();
 
-// Start the server (no fixed port for Vercel)
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+  // Send the game
+
