@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Use environment variables for security
-const botToken = '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
+const botToken = process.env.BOT_TOKEN || '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
 const bot = new Telegraf(botToken);
 
 // Webhook URL (change to your actual deployed domain)
@@ -57,15 +57,15 @@ bot.on('callback_query', async (ctx) => {
 
   console.log(`User ID: ${userId}`);
 
-  // Answer the callback query first
+  // Answer the callback query first to prevent errors
   await ctx.answerCbQuery();
 
-  // Send the game only in private chat
-  if (ctx.chat && ctx.chat.type === "private") {
-    await ctx.telegram.sendGame(ctx.chat.id, "GuessGm");
-  } else {
-    await ctx.reply("Please start the game in a private chat.");
-  }
+  // Send a message separately to avoid "sendMessage" error inside callback_query
+  await ctx.telegram.sendMessage(userId, "Click the button below to play!", {
+    reply_markup: {
+      inline_keyboard: [[{ text: "Play Now", url: gameUrl }]]
+    }
+  });
 });
 
 // Start the Express server (no fixed port for Vercel)
