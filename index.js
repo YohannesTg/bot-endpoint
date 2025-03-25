@@ -59,7 +59,7 @@ bot.on('callback_query', async (ctx) => {
   console.log(`User ID: ${userId}`);
   console.log(`Chat ID: ${chatId}`);
 
-  await ctx.answerCallbackQuery({ url: gameUrl });
+  await ctx.answerCallbackQuery({gameUrl});
 });
 
 // Start the server (no fixed port for Vercel)
