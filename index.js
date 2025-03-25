@@ -1,7 +1,6 @@
-const express = require('express');
+const express = require('express'); 
 const bodyParser = require('body-parser');
-const { Telegraf, Markup} = require('telegraf');
-
+const { Telegraf, Markup } = require('telegraf');
 
 const app = express();
 app.use(bodyParser.json());
@@ -10,42 +9,33 @@ app.use(bodyParser.json());
 const botToken = '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
 const bot = new Telegraf(botToken);
 
-// Set up the webhook URL
-const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`
+// Webhook URL
+const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
+
 // Set up the webhook route
-app.post(`/webhook/${botToken}`, (req, res) => {
-  bot.handleUpdate(req.body);
+app.post(`/webhook/${botToken}`, async (req, res) => {
+  await bot.handleUpdate(req.body);
   res.sendStatus(200);
 });
 
-// Set the webhook
+// Set the webhook after defining the route
 bot.telegram.setWebhook(webhookUrl);
 
-// Start the bot
-bot.startWebhook(`/webhook/${botToken}`, null, 8443);
-
-// Handle incoming text messages
+// Handle "/inline" command with buttons
 bot.command("inline", (ctx) => {
     ctx.reply("Hi there!", {
         reply_markup: {
             inline_keyboard: [
-                /* Inline buttons. 2 side-by-side */
                 [ { text: "Button 1", callback_data: "btn-1" }, { text: "Button 2", callback_data: "btn-2" } ],
-
-                /* One button */
                 [ { text: "Next", callback_data: "next" } ],
-                
-                /* Also, we can have URL buttons. */
-                [ { text: "Open in browser", url: "telegraf.js.org" } ]
+                [ { text: "Open in browser", url: "https://telegraf.js.org" } ]
             ]
         }
     });
 });
 
+// Handle inline query for game
 bot.on('inline_query', (ctx) => {
-  const query = ctx.inlineQuery.query; // Access the query string from the context object
-
-  // Generate the inline query results
   const game = {
     type: 'game',
     id: '1',
@@ -56,24 +46,24 @@ bot.on('inline_query', (ctx) => {
       ],
     },
   };
-
-  // Send the inline query results back to the user
   return ctx.answerInlineQuery([game]);
 });
+
+// Handle callback queries
 bot.on('callback_query', async (ctx) => {
-  
-  const callbackQueryId = ctx.callbackQuery.id;
   const userId = ctx.callbackQuery.from.id;
   const chatId = ctx.callbackQuery.chat_instance;
-  const userName = ctx.callbackQuery.from.first_name;
+  const userName = encodeURIComponent(ctx.callbackQuery.from.first_name);
   const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
 
   console.log(`User ID: ${userId}`);
   console.log(`Chat ID: ${chatId}`);
-  // Answer the callback query with the game URL
-  await ctx.answerGameQuery(gameUrl);
+
+  await ctx.answerCallbackQuery({ url: gameUrl });
 });
 
-app.listen(8443, () => {
-  console.log('Express server is running on port 8443');
+// Start the server (no fixed port for Vercel)
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
