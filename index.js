@@ -62,5 +62,12 @@ bot.on('callback_query', async (ctx) => {
   // Answer the callback query first
   await ctx.answerCbQuery();
 
-  // Send the game
+  // Send the game to the user
+  await ctx.replyWithGame("GuessGm");
+});
 
+// Start the Express server (no fixed port for Vercel)
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
