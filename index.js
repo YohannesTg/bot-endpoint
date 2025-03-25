@@ -52,18 +52,20 @@ bot.on('inline_query', async (ctx) => {
 // Handle callback queries (Game launch)
 bot.on('callback_query', async (ctx) => {
   const userId = ctx.callbackQuery.from.id;
-  const chatId = ctx.callbackQuery.chat_instance;
   const userName = encodeURIComponent(ctx.callbackQuery.from.first_name);
-  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
+  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&userName=${userName}`;
 
   console.log(`User ID: ${userId}`);
-  console.log(`Chat ID: ${chatId}`);
 
   // Answer the callback query first
   await ctx.answerCbQuery();
 
-  // Send the game to the user
-  await ctx.replyWithGame("GuessGm");
+  // Send the game only in private chat
+  if (ctx.chat && ctx.chat.type === "private") {
+    await ctx.telegram.sendGame(ctx.chat.id, "GuessGm");
+  } else {
+    await ctx.reply("Please start the game in a private chat.");
+  }
 });
 
 // Start the Express server (no fixed port for Vercel)
