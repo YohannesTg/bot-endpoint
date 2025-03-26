@@ -1,39 +1,51 @@
-const express = require('express'); 
-const bodyParser = require('body-parser');
-const { Telegraf } = require('telegraf');
+import express from 'express';
+import { Telegraf } from 'telegraf';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Load environment variables
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json()); // Use built-in JSON parsing
 
-// Use environment variables for security
-const botToken = process.env.BOT_TOKEN || '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
+// Secure bot token from environment variables
+const botToken = process.env.BOT_TOKEN;
+if (!botToken) {
+  throw new Error("Missing BOT_TOKEN in environment variables.");
+}
+
 const bot = new Telegraf(botToken);
 
-// Webhook URL (change to your actual deployed domain)
+// Webhook URL (Change this to your actual deployed domain)
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
 
-// Set up the webhook route
+// Webhook route
 app.post(`/webhook/${botToken}`, async (req, res) => {
-  await bot.handleUpdate(req.body);
-  res.sendStatus(200);
+  try {
+    await bot.handleUpdate(req.body);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error handling update:", error);
+    res.sendStatus(500);
+  }
 });
 
-// Set the webhook properly
-(async () => {
+// Set up the webhook
+const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
-    console.log("Webhook set successfully");
+    console.log("✅ Webhook set successfully");
   } catch (error) {
-    console.error("Error setting webhook:", error);
+    console.error("❌ Error setting webhook:", error);
   }
-})();
+};
+setupWebhook();
 
 // Handle inline query to return the game
 bot.on('inline_query', async (ctx) => {
   const game = {
     type: 'game',
     id: '1',
-    game_short_name: 'GuessGm', // Ensure this matches your Telegram game short name
+    game_short_name: 'GuessGm', // Must match Telegram's registered game name
   };
 
   return ctx.answerInlineQuery([game]);
@@ -41,22 +53,16 @@ bot.on('inline_query', async (ctx) => {
 
 // Handle callback queries for launching the game
 bot.on('callback_query', async (ctx) => {
-  const callbackQueryId = ctx.callbackQuery.id;
   const userId = ctx.callbackQuery.from.id;
-  const chatId = ctx.callbackQuery.chat_instance;
-  const userName = ctx.callbackQuery.from.first_name;
-  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
+  console.log(`🎮 Game started by User ID: ${userId}`);
 
-  console.log(`User ID: ${userId}`);
-  console.log(`Chat ID: ${chatId}`);
+  // Answer callback query to allow game launch
+  await ctx.answerCbQuery();
 
-  // Answer the callback query with the game URL
-  await ctx.answerGameQuery(gameUrl)
+  // Start the game in Telegram
+  await ctx.telegram.sendGame(userId, "GuessGm"); // Ensure "GuessGm" is your registered game name
 });
 
-
-// Start the Express server (no fixed port for Vercel)
+// Start the Express server
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
