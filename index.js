@@ -1,6 +1,6 @@
 const express = require('express'); 
 const bodyParser = require('body-parser');
-const { Telegraf, Markup } = require('telegraf');
+const { Telegraf } = require('telegraf');
 
 const app = express();
 app.use(bodyParser.json());
@@ -28,51 +28,23 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 })();
 
-// Handle "/inline" command with buttons
-bot.command("inline", (ctx) => {
-    ctx.reply("Hi there!", {
-        reply_markup: {
-            inline_keyboard: [
-                [ { text: "Button 1", callback_data: "btn-1" }, { text: "Button 2", callback_data: "btn-2" } ],
-                [ { text: "Next", callback_data: "next" } ],
-                [ { text: "Open in browser", url: "https://telegraf.js.org" } ]
-            ]
-        }
-    });
-});
-
-// Handle inline query for the game
+// Handle inline query to return the game
 bot.on('inline_query', async (ctx) => {
   const game = {
     type: 'game',
     id: '1',
-    game_short_name: 'GuessGm',
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Play Now', callback_game: {} }]
-      ],
-    },
+    game_short_name: 'GuessGm', // Ensure this matches your Telegram game short name
   };
+
   return ctx.answerInlineQuery([game]);
 });
 
-// Handle callback queries (Game launch)
+// Handle callback queries for launching the game
 bot.on('callback_query', async (ctx) => {
-  const userId = ctx.callbackQuery.from.id;
-  const userName = encodeURIComponent(ctx.callbackQuery.from.first_name);
-  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&userName=${userName}`;
-
-  console.log("User ID: " + userId);
+  console.log("Game started by user:", ctx.callbackQuery.from.id);
   
-  // Answer the callback query first to prevent errors
+  // Answer the callback query to launch the game directly
   await ctx.answerCbQuery();
-
-  // Send a message with a button instead of using `answerGameQuery()`
-  await ctx.telegram.sendMessage(userId, "Click the button below to play!", {
-    reply_markup: {
-      inline_keyboard: [[{ text: "Play Now", url: gameUrl }]]
-    }
-  });
 });
 
 // Start the Express server (no fixed port for Vercel)
