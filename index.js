@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Use environment variables for security
-const botToken = process.env.BOT_TOKEN || '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
+const botToken = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
 const bot = new Telegraf(botToken);
 
 // Webhook URL (change to your actual deployed domain)
@@ -18,8 +18,15 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   res.sendStatus(200);
 });
 
-// Set the webhook after defining the route
-bot.telegram.setWebhook(webhookUrl);
+// Set the webhook properly
+(async () => {
+  try {
+    await bot.telegram.setWebhook(webhookUrl);
+    console.log("Webhook set successfully");
+  } catch (error) {
+    console.error("Error setting webhook:", error);
+  }
+})();
 
 // Handle "/inline" command with buttons
 bot.command("inline", (ctx) => {
@@ -51,17 +58,21 @@ bot.on('inline_query', async (ctx) => {
 
 // Handle callback queries (Game launch)
 bot.on('callback_query', async (ctx) => {
-  
-  const callbackQueryId = ctx.callbackQuery.id;
   const userId = ctx.callbackQuery.from.id;
-  const chatId = ctx.callbackQuery.chat_instance;
-  const userName = ctx.callbackQuery.from.first_name;
-  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
+  const userName = encodeURIComponent(ctx.callbackQuery.from.first_name);
+  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&userName=${userName}`;
 
-  console.log(User ID: ${userId});
-  console.log(Chat ID: ${chatId});
-  // Answer the callback query with the game URL
-  await ctx.answerGameQuery(gameUrl);
+  console.log("User ID: " + userId);
+  
+  // Answer the callback query first to prevent errors
+  await ctx.answerCbQuery();
+
+  // Send a message with a button instead of using `answerGameQuery()`
+  await ctx.telegram.sendMessage(userId, "Click the button below to play!", {
+    reply_markup: {
+      inline_keyboard: [[{ text: "Play Now", url: gameUrl }]]
+    }
+  });
 });
 
 // Start the Express server (no fixed port for Vercel)
