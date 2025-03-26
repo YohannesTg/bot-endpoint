@@ -50,15 +50,22 @@ bot.on('inline_query', async (ctx) => {
 
 // Handle callback queries for launching the game
 bot.on('callback_query', async (ctx) => {
+  const callbackQueryId = ctx.callbackQuery.id;
   const userId = ctx.callbackQuery.from.id;
-  console.log(`🎮 Game started by User ID: ${userId}`);
+  const chatId = ctx.callbackQuery.chat_instance;
+  const userName = ctx.callbackQuery.from.first_name;
+  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
 
-  // Answer callback query to allow game launch
-  await ctx.answerCbQuery();
+  console.log(`User ID: ${userId}`);
+  console.log(`Chat ID: ${chatId}`);
 
-  // Start the game in Telegram
-  await ctx.telegram.sendGame(userId, "GuessGm"); // Ensure "GuessGm" is your registered game name
+  // Answer the callback query to let Telegram know the request was processed
+  await ctx.answerGameQuery();
+
+  // Optionally, you could send a follow-up message or trigger the game (if needed)
+  // await ctx.telegram.sendMessage(userId, `Click here to play the game: ${gameUrl}`);
 });
+
 
 // Start the Express server
 const port = process.env.PORT || 3000;
