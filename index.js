@@ -1,13 +1,10 @@
 import express from 'express';
 import { Telegraf } from 'telegraf';
-import dotenv from 'dotenv';
-
-dotenv.config(); // Load environment variables
 
 const app = express();
 app.use(express.json()); // Use built-in JSON parsing
 
-// Secure bot token from environment variables
+// Use environment variables for security
 const botToken = process.env.BOT_TOKEN;
 if (!botToken) {
   throw new Error("Missing BOT_TOKEN in environment variables.");
@@ -45,7 +42,7 @@ bot.on('inline_query', async (ctx) => {
   const game = {
     type: 'game',
     id: '1',
-    game_short_name: 'GuessGm', // Must match Telegram's registered game name
+    game_short_name: 'GuessGm', // Ensure this matches your Telegram game short name
   };
 
   return ctx.answerInlineQuery([game]);
