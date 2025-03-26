@@ -60,7 +60,7 @@ bot.on('callback_query', async (ctx) => {
   console.log(`Chat ID: ${chatId}`);
 
   // Answer the callback query to let Telegram know the request was processed
-  await ctx.answerGameQuery();
+  await ctx.answerGameQuery(gameUrl);
 
   // Optionally, you could send a follow-up message or trigger the game (if needed)
   // await ctx.telegram.sendMessage(userId, `Click here to play the game: ${gameUrl}`);
