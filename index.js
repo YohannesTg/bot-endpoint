@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Use environment variables for security
-const botToken = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+const botToken = process.env.BOT_TOKEN || '7663415602:AAHYqRDRVwntaokbWu_XkyRmkUHSuQmBJLQ';
 const bot = new Telegraf(botToken);
 
 // Webhook URL (change to your actual deployed domain)
