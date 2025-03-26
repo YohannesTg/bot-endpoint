@@ -41,11 +41,19 @@ bot.on('inline_query', async (ctx) => {
 
 // Handle callback queries for launching the game
 bot.on('callback_query', async (ctx) => {
-  console.log("Game started by user:", ctx.callbackQuery.from.id);
-  
-  // Answer the callback query to launch the game directly
-  await ctx.answerCbQuery();
+  const callbackQueryId = ctx.callbackQuery.id;
+  const userId = ctx.callbackQuery.from.id;
+  const chatId = ctx.callbackQuery.chat_instance;
+  const userName = ctx.callbackQuery.from.first_name;
+  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
+
+  console.log(`User ID: ${userId}`);
+  console.log(`Chat ID: ${chatId}`);
+
+  // Answer the callback query with the game URL
+  await ctx.answerGameQuery(gameUrl)
 });
+
 
 // Start the Express server (no fixed port for Vercel)
 const port = process.env.PORT || 3000;
