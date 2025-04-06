@@ -24,19 +24,16 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
 });
 
 // === /start command ===
-bot.start(async (ctx) => {
-  if (ctx.chat.type !== 'private') {
-    return ctx.reply('❌ Please start the game in a private chat with me.');
-  }
 
+bot.start((ctx) => {
   const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
 
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.game('🎯 Solo Play', 'GuessGm')],
+    [Markup.button.game('🎯 Solo Play', 'GuessGm')],  // Correct game button
     [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
 
-  await ctx.reply(welcomeMessage, keyboard);
+  ctx.reply(welcomeMessage, keyboard);
 });
 
 // === Game launch handler ===
