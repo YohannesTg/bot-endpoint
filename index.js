@@ -26,10 +26,10 @@ bot.start((ctx) => {
   ctx.reply(
     `🎮 Welcome ${ctx.from.first_name}! Choose your mode:`,
     Markup.inlineKeyboard([
-      [
+      
         Markup.button.game('🎯 Solo Play', 'GuessGm'),
         Markup.button.game('👥 Play with Friends', 'GuessGm')
-      ]
+
     ])
   );
 });
