@@ -6,10 +6,13 @@ app.use(express.json());
 
 const botToken = process.env.BOT_TOKEN;
 if (!botToken) throw new Error("Missing BOT_TOKEN");
+
 const bot = new Telegraf(botToken);
 
-// Webhook Setup
+// Webhook URL (adjust to match your hosting platform)
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
+
+// Webhook handler for Telegram updates
 app.post(`/webhook/${botToken}`, async (req, res) => {
   try {
     await bot.handleUpdate(req.body);
@@ -20,77 +23,53 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Start Command with PROPER GAME BUTTON
+// === /start command ===
 bot.start(async (ctx) => {
   if (ctx.chat.type !== 'private') {
-    return ctx.reply('❌ Please use this command in a private chat.');
+    return ctx.reply('❌ Please start the game in a private chat with me.');
   }
 
-  // Game button with explicit short name
-  await ctx.reply(
-    `🎮 Welcome ${ctx.from.first_name}! Tap below to play solo:`,
-    Markup.inlineKeyboard([
-      [Markup.button.game('🎯 Play Solo', 'GuessGm')]  // <- short name MUST match BotFather
-    ])
-  );
+  const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
 
-  // Optional: Invite friends
-  await ctx.reply(
-    '👥 Or invite friends to a group:',
-    Markup.inlineKeyboard([
-      [Markup.button.switchToChat('📨 Play with Friends', 'GuessGm')]
-    ])
-  );
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.game('🎯 Solo Play', 'GuessGm')],
+    [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
+  ]);
+
+  await ctx.reply(welcomeMessage, keyboard);
 });
 
-
-  // Reply separately with invite friends button
-  await ctx.reply(
-    '👥 Or invite your friends:',
-    Markup.inlineKeyboard([
-      [Markup.button.switchToChat('📨 Invite Friends', 'GuessGm')]
-    ])
-  );
-});
-
-
-// Unified Game Handler
+// === Game launch handler ===
+// This handles when user taps "Solo Play" or inline game
 bot.on('callback_query', async (ctx) => {
-  const { game_short_name } = ctx.callbackQuery;
-  
-  // Check if the game_short_name matches 'GuessGm' and handle accordingly
-  if (game_short_name === 'GuessGm') {
-    const { from, chat_instance } = ctx.callbackQuery;
-    const mode = ctx.callbackQuery.inline_message_id ? 'multi' : 'solo'; // Determine game mode
-    
-    // Build the game URL dynamically based on the mode (solo or multiplayer)
+  const query = ctx.callbackQuery;
+
+  if (query.game_short_name === 'GuessGm') {
+    const { from, chat_instance, inline_message_id } = query;
+    const mode = inline_message_id ? 'multi' : 'solo';
+
     const gameUrl = `https://g-game.vercel.app/?` +
       `userId=${from.id}&` +
       `chatId=${chat_instance}&` +
       `userName=${encodeURIComponent(from.first_name)}&` +
       `mode=${mode}`;
-    
-    // Answer the game query with the generated URL
+
     await ctx.answerGameQuery(gameUrl);
   }
 });
 
-// Inline Query Handler (Multiplayer)
+// === Inline query handler (for group invites) ===
 bot.on('inline_query', async (ctx) => {
   const results = [{
     type: 'game',
     id: '1',
-    game_short_name: 'GuessGm',
-    reply_markup: Markup.inlineKeyboard([
-      Markup.button.game('🎮 Play Now', 'GuessGm')
-    ])
+    game_short_name: 'GuessGm'
   }];
-  
-  // Answer the inline query with the game
+
   return ctx.answerInlineQuery(results);
 });
 
-// Webhook Setup
+// === Set webhook on startup ===
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
@@ -101,5 +80,6 @@ const setupWebhook = async () => {
 };
 setupWebhook();
 
+// === Start the server ===
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
