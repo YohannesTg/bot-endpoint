@@ -8,7 +8,7 @@ const botToken = process.env.BOT_TOKEN;
 if (!botToken) throw new Error("Missing BOT_TOKEN");
 const bot = new Telegraf(botToken);
 
-// Webhook Configuration
+// Webhook Setup
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
 app.post(`/webhook/${botToken}`, async (req, res) => {
   try {
@@ -20,66 +20,79 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Start Command with Game Buttons
+// Enhanced Start Command
 bot.start((ctx) => {
-  ctx.reply(
-    `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.game('🎯 Solo Play', 'GuessGm'),
-        Markup.button.game('👥 Multiplayer', 'GuessGm')
-      ]
-    ])
-  );
+  const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.callback('🎯 Solo Play', 'play_solo')],
+    [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
+  ]);
+  ctx.reply(welcomeMessage, keyboard);
 });
 
-// Game Launch Handler
-bot.on('callback_query', async (ctx) => {
+// Solo Play Handler with User Parameters
+bot.action('play_solo', async (ctx) => {
   const { from, chat_instance } = ctx.callbackQuery;
-  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard?.[0]?.[0]?.text.includes('Solo');
-  
-  // Construct game URL with parameters
-  const gameUrl = new URL('https://g-game.vercel.app/');
-  gameUrl.searchParams.set('userId', from.id);
-  gameUrl.searchParams.set('chatId', chat_instance);
-  gameUrl.searchParams.set('userName', from.first_name);
-  gameUrl.searchParams.set('mode', isSolo ? 'solo' : 'multi');
+  const gameUrl = `https://g-game.vercel.app/?` +
+    `userId=${from.id}&` +
+    `chatId=${chat_instance}&` +
+    `userName=${encodeURIComponent(from.first_name)}&` +
+    `mode=solo`;
 
-  // Answer the game query
-  await ctx.answerGameQuery(gameUrl.toString());
-
-  // Send confirmation message
-  await ctx.telegram.sendMessage(
-    from.id,
-    isSolo ? `🎮 Starting solo adventure...` : `🎉 Inviting friends to play...`,
+  // Edit message with proper game button
+  await ctx.editMessageText(
+    `🎮 Starting Solo Game for ${from.first_name}...`,
     Markup.inlineKeyboard([
-      [Markup.button.game('🔄 Play Again', 'GuessGm')]
+      Markup.button.game('🚀 START GAME', 'GuessGm')
     ])
   );
+
+  // Answer the callback first
+  await ctx.answerCbQuery();
+  
+  // Answer the game query separately when game button is pressed
+  bot.on('callback_query', async (ctx) => {
+    if (ctx.callbackQuery.game_short_name === 'GuessGm') {
+      await ctx.answerGameQuery(gameUrl);
+    }
+  });
+});
+
+// Multiplayer Game Handler
+bot.on('callback_query', async (ctx) => {
+  if (ctx.callbackQuery.game_short_name === 'GuessGm') {
+    const { from, chat_instance } = ctx.callbackQuery;
+    const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&chatId=${chat_instance}&userName=${encodeURIComponent(from.first_name)}`;
+
+    await ctx.answerGameQuery(gameUrl);
+    
+  }
 });
 
 // Inline Query Handler
-bot.on('inline_query', (ctx) => {
-  ctx.answerInlineQuery([{
+bot.on('inline_query', async (ctx) => {
+  const results = [{
     type: 'game',
     id: '1',
-    game_short_name: 'GuessGm'
-  }]);
+    game_short_name: 'GuessGm',
+    reply_markup: Markup.inlineKeyboard([
+      Markup.button.url('🎮 Solo Play', `https://g-game.vercel.app/solo?userId=${ctx.from.id}&userName=${encodeURIComponent(ctx.from.first_name)}`)
+    ])
+  }];
+  
+  return ctx.answerInlineQuery(results);
 });
 
-// Webhook Setup
+// Webhook and Server Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
-    console.log('✅ Webhook configured successfully');
+    console.log("✅ Webhook set successfully");
   } catch (error) {
-    console.error('❌ Webhook setup error:', error);
+    console.error("❌ Error setting webhook:", error);
   }
 };
+setupWebhook();
 
-// Server Startup
 const port = process.env.PORT || 3000;
-app.listen(port, async () => {
-  await setupWebhook();
-  console.log(`🚀 Server running on port ${port}`);
-});
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
