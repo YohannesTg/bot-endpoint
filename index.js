@@ -41,13 +41,6 @@ bot.action('play_solo', async (ctx) => {
       Markup.button.url('🚀 Start Solo Game', soloUrl)
     ])
   );
-
-  await ctx.reply(
-    `🔗 Your personal game link:\n${soloUrl}`,
-    Markup.inlineKeyboard([
-      Markup.button.switchToChat('👥 Challenge Friends', 'GuessGm')
-    ])
-  );
   
   await ctx.answerCbQuery();
 });
