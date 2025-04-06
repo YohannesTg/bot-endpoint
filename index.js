@@ -21,21 +21,21 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Unified Game Start Command
+// Unified Game Start Command (Fixed Syntax)
 bot.start((ctx) => {
   ctx.reply(
     `🎮 Welcome ${ctx.from.first_name}! Choose your mode:`,
     Markup.inlineKeyboard([
       [Markup.button.game('🎯 Solo Play', 'GuessGm')],
       [Markup.button.game('👥 Play with Friends', 'GuessGm')]
-    )
+    ])
   );
 });
 
-// Game Launch Handler
+// Game Launch Handler (Improved Safety)
 bot.on('callback_query', async (ctx) => {
   const { from, chat_instance } = ctx.callbackQuery;
-  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard[0][0].text === '🎯 Solo Play';
+  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard?.[0]?.[0]?.text === '🎯 Solo Play';
   
   const gameUrl = `https://g-game.vercel.app/?` +
     `userId=${from.id}&` +
@@ -45,12 +45,12 @@ bot.on('callback_query', async (ctx) => {
 
   await ctx.answerGameQuery(gameUrl);
 
-  // Send game confirmation
+  // Send game confirmation (Fixed Markup)
   await ctx.telegram.sendMessage(
     from.id,
     isSolo ? `🎮 Solo game starting...` : `🎉 Game invite sent to chat!`,
     Markup.inlineKeyboard([
-      Markup.button.game('🔄 Play Again', 'GuessGm')
+      [Markup.button.game('🔄 Play Again', 'GuessGm')]
     ])
   );
 });
