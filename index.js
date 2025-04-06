@@ -1,21 +1,15 @@
 import express from 'express';
-import { Telegraf } from 'telegraf';
+import { Telegraf, Markup } from 'telegraf';
 
 const app = express();
-app.use(express.json()); // Use built-in JSON parsing
+app.use(express.json());
 
-// Use environment variables for security
 const botToken = process.env.BOT_TOKEN;
-if (!botToken) {
-  throw new Error("Missing BOT_TOKEN in environment variables.");
-}
-
+if (!botToken) throw new Error("Missing BOT_TOKEN");
 const bot = new Telegraf(botToken);
 
-// Webhook URL (Change this to your actual deployed domain)
+// Webhook Setup
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
-
-// Webhook route
 app.post(`/webhook/${botToken}`, async (req, res) => {
   try {
     await bot.handleUpdate(req.body);
@@ -26,7 +20,64 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Set up the webhook
+// Interactive Start Command
+bot.start((ctx) => {
+  const welcomeMessage = `👋 Hello ${ctx.from.first_name}! 💝 Ready to play a fun game with your beloved? Let's get started!`;
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.callback('🎮 Play Now', 'play_game')],
+    [Markup.button.callback('💌 Share with Partner', 'share_game')]
+  ]);
+  ctx.reply(welcomeMessage, keyboard);
+});
+
+// Play Game Handler
+bot.action('play_game', async (ctx) => {
+  await ctx.replyWithGame('GuessGm');
+  await ctx.reply(`💖 Share the fun with your beloved!`, 
+    Markup.inlineKeyboard([
+      Markup.button.callback('💌 Share Game', 'share_game')
+    ])
+  );
+  await ctx.answerCbQuery();
+});
+
+// Share Game Handler
+bot.action('share_game', async (ctx) => {
+  const shareMessage = `💞 Spread the love! Click below to share GuessGm:`;
+  const shareButton = Markup.inlineKeyboard([
+    Markup.button.switchToCurrentChat('🔗 Share Game Now', 'GuessGm')
+  ]);
+  await ctx.reply(shareMessage, shareButton);
+  await ctx.answerCbQuery();
+});
+
+// Existing Game Features
+bot.on('inline_query', async (ctx) => {
+  const game = {
+    type: 'game',
+    id: '1',
+    game_short_name: 'GuessGm',
+  };
+  return ctx.answerInlineQuery([game]);
+});
+
+bot.on('callback_query', async (ctx) => {
+  const { id, from, chat_instance } = ctx.callbackQuery;
+  const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&chatId=${chat_instance}&userName=${from.first_name}`;
+
+  await ctx.answerGameQuery(gameUrl);
+  
+  // Post-game sharing prompt
+  await ctx.telegram.sendMessage(
+    from.id,
+    `🎉 Hope you enjoyed the game, ${from.first_name}! Share it with someone special!`,
+    Markup.inlineKeyboard([
+      Markup.button.callback('💌 Share Again', 'share_game')
+    ])
+  );
+});
+
+// Server Initialization
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
@@ -37,36 +88,5 @@ const setupWebhook = async () => {
 };
 setupWebhook();
 
-// Handle inline query to return the game
-bot.on('inline_query', async (ctx) => {
-  const game = {
-    type: 'game',
-    id: '1',
-    game_short_name: 'GuessGm', // Ensure this matches your Telegram game short name
-  };
-
-  return ctx.answerInlineQuery([game]);
-});
-
-// Handle callback queries for launching the game
-bot.on('callback_query', async (ctx) => {
-  const callbackQueryId = ctx.callbackQuery.id;
-  const userId = ctx.callbackQuery.from.id;
-  const chatId = ctx.callbackQuery.chat_instance;
-  const userName = ctx.callbackQuery.from.first_name;
-  const gameUrl = `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${userName}`;
-
-  console.log(`User ID: ${userId}`);
-  console.log(`Chat ID: ${chatId}`);
-
-  // Answer the callback query to let Telegram know the request was processed
-  await ctx.answerGameQuery(gameUrl);
-
-  // Optionally, you could send a follow-up message or trigger the game (if needed)
-  // await ctx.telegram.sendMessage(userId, `Click here to play the game: ${gameUrl}`);
-});
-
-
-// Start the Express server
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
