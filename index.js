@@ -20,53 +20,69 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Enhanced Start Command with Friend Selection
+// Enhanced Start Command
 bot.start((ctx) => {
-  const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}! 💖\nPlay alone or challenge someone special:`;
+  const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.callback('🎯 Play Solo', 'play_solo')],
+    [Markup.button.callback('🎯 Solo Play', 'play_solo')],
     [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
   ctx.reply(welcomeMessage, keyboard);
 });
 
-// Solo Play Handler
+// Solo Play Handler with User Parameters
 bot.action('play_solo', async (ctx) => {
-  await ctx.replyWithGame('GuessGm');
-  await ctx.answerCbQuery();
-  await ctx.reply(
-    `❤️ Having fun? Share with someone special!`,
+  const { from, chat_instance } = ctx.callbackQuery;
+  const soloUrl = `https://g-game.vercel.app/solo?userId=${from.id}&chatId=${chat_instance}&userName=${encodeURIComponent(from.first_name)}`;
+
+  await ctx.editMessageText(
+    `🎮 Starting Solo Game for ${from.first_name}...\nTap below to begin!`,
     Markup.inlineKeyboard([
-      Markup.button.switchToChat('👫 Challenge a Friend', 'GuessGm')
+      Markup.button.url('🚀 Start Solo Game', soloUrl)
     ])
   );
+
+  await ctx.reply(
+    `🔗 Your personal game link:\n${soloUrl}`,
+    Markup.inlineKeyboard([
+      Markup.button.switchToChat('👥 Challenge Friends', 'GuessGm')
+    ])
+  );
+  
+  await ctx.answerCbQuery();
 });
 
-// Inline Game Handler (for friend selection)
+// Multiplayer Game Handler
+bot.on('callback_query', async (ctx) => {
+  if (ctx.callbackQuery.game_short_name === 'GuessGm') {
+    const { from, chat_instance } = ctx.callbackQuery;
+    const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&chatId=${chat_instance}&userName=${encodeURIComponent(from.first_name)}`;
+
+    await ctx.answerGameQuery(gameUrl);
+    
+    await ctx.telegram.sendMessage(
+      from.id,
+      `🎉 Challenge sent to chat!\nWaiting for players...`,
+      Markup.inlineKeyboard([
+        [Markup.button.url('Game Dashboard', gameUrl)],
+        [Markup.button.callback('🚀 Start Solo Game', 'play_solo')]
+      ])
+    );
+  }
+});
+
+// Inline Query Handler
 bot.on('inline_query', async (ctx) => {
-  const game = {
+  const results = [{
     type: 'game',
     id: '1',
     game_short_name: 'GuessGm',
-  };
-  return ctx.answerInlineQuery([game]);
-});
-
-// Game Launch Handler
-bot.on('callback_query', async (ctx) => {
-  const { id, from, chat_instance } = ctx.callbackQuery;
-  const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&chatId=${chat_instance}&userName=${from.first_name}`;
-  
-  await ctx.answerGameQuery(gameUrl);
-  
-  // Send confirmation to both players
-  await ctx.telegram.sendMessage(
-    from.id,
-    `🎉 Game sent successfully! Waiting for your friend to join...`,
-    Markup.inlineKeyboard([
-      Markup.button.url('🔗 Game Link', gameUrl)
+    reply_markup: Markup.inlineKeyboard([
+      Markup.button.url('🎮 Solo Play', `https://g-game.vercel.app/solo?userId=${ctx.from.id}&userName=${encodeURIComponent(ctx.from.first_name)}`)
     ])
-  );
+  }];
+  
+  return ctx.answerInlineQuery(results);
 });
 
 // Webhook and Server Setup
