@@ -20,84 +20,72 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Stylish Start Command
+// Game Session Configuration
+const gameUrls = {
+  solo: (userId, chatId, userName) => 
+    `https://g-game.vercel.app/solo?userId=${userId}&chatId=${chatId}&userName=${encodeURIComponent(userName)}`,
+  multi: (userId, chatId, userName) =>
+    `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${encodeURIComponent(userName)}&mode=multi`
+};
+
+// Interactive Start Command
 bot.start((ctx) => {
-  ctx.replyWithSticker('CAACAgIAAxkBAAEL3NhmmdR6Q9VvAAE6QbQ7xq0p9VXbDosAAhUAA8A2TxMX-dh4AAIFSNA0MA')
-    .then(() => {
-      ctx.reply(
-        `🌟 *Hey ${ctx.from.first_name}!* 🌟\nReady for an epic challenge?`,
-        {
-          parse_mode: 'Markdown',
-          ...Markup.inlineKeyboard([
-            [Markup.button.game('🚀 Launch Cosmic Challenge', 'GuessGm')],
-            [Markup.button.url('📊 Leaderboards', 'https://your-leaderboard-link.com')]
-          ])
-        }
-      );
-    });
-});
-
-// Dynamic Game Handler
-bot.on('callback_query', async (ctx) => {
-  const { from, chat_instance } = ctx.callbackQuery;
-  
-  // Generate unique session ID
-  const sessionId = Math.random().toString(36).substr(2, 9);
-  const gameUrl = `https://g-game.vercel.app/?` +
-    `session=${sessionId}&` +
-    `uid=${from.id}&` +
-    `cid=${chat_instance}&` +
-    `uname=${encodeURIComponent(from.first_name)}&` +
-    `ref=TG`;
-
-  await ctx.answerGameQuery(gameUrl);
-
-  // Send animated confirmation
-  await ctx.telegram.sendMessage(
-    from.id,
-    `🎮 *Game Portal Activated!* 🕹️\n` +
-    `Prepare for liftoff, *${from.first_name}*!\n` +
-    `_Share the excitement below_ 👇`,
-    {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard([
-        [Markup.button.switchToChat('🔗 Invite Allies', 'CosmicGame')],
-        [Markup.button.url('🎮 Direct Access', gameUrl)]
-      ])
-    }
+  ctx.reply(
+    `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`,
+    Markup.inlineKeyboard([
+      [
+        Markup.button.game('🎯 Solo Challenge', 'GuessGm'),
+        Markup.button.game('👥 Play with Partner', 'GuessGm')
+      ]
+    ])
   );
 });
 
-// Inline Query Handler with Flair
-bot.on('inline_query', (ctx) => {
-  ctx.answerInlineQuery([
-    {
-      type: 'game',
-      id: 'cosmic_001',
-      game_short_name: 'CosmicGame',
-      title: '🚀 Cosmic Challenge',
-      description: 'Battle across the stars!',
-      photo_url: 'https://your-cdn.com/space-game-preview.jpg'
-    }
-  ], {
-    cache_time: 0,
-    is_personal: true
-  });
+// Unified Game Handler
+bot.on('callback_query', async (ctx) => {
+  const { from, chat_instance } = ctx.callbackQuery;
+  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard?.[0]?.[0]?.text.includes('Solo');
+
+  const gameUrl = isSolo 
+    ? gameUrls.solo(from.id, chat_instance, from.first_name)
+    : gameUrls.multi(from.id, chat_instance, from.first_name);
+
+  await ctx.answerGameQuery(gameUrl);
+
+  await ctx.telegram.sendMessage(
+    from.id,
+    `${isSolo ? '🎮 Solo session' : '👥 Partner session'} started!`,
+    Markup.inlineKeyboard([
+      [Markup.button.game('🔄 Play Again', 'GuessGm')],
+      [Markup.button.url('📊 View Progress', `https://g-game.vercel.app/stats/${from.id}`)]
+    ])
+  );
 });
 
-// Webhook Setup
+// Inline Query Handler
+bot.on('inline_query', (ctx) => {
+  ctx.answerInlineQuery([{
+    type: 'game',
+    id: '1',
+    game_short_name: 'GuessGm',
+    reply_markup: Markup.inlineKeyboard([
+      Markup.button.url('🌟 Player Profile', `https://g-game.vercel.app/profile/${ctx.from.id}`)
+    ])
+  }]);
+});
+
+// Server Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
-    console.log('🌌 Webhook Connected to Telegram Orbit');
+    console.log('✅ Webhook configured:', webhookUrl);
   } catch (error) {
-    console.error('⚠️ Cosmic Connection Failed:', error);
+    console.error('❌ Webhook setup failed:', error);
   }
 };
 
-// Server Launch Sequence
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {
   await setupWebhook();
-  console.log(`🚀 Server warping through port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
 });
