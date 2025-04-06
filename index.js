@@ -8,7 +8,7 @@ const botToken = process.env.BOT_TOKEN;
 if (!botToken) throw new Error("Missing BOT_TOKEN");
 const bot = new Telegraf(botToken);
 
-// Webhook Setup
+// Webhook Configuration
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
 app.post(`/webhook/${botToken}`, async (req, res) => {
   try {
@@ -20,61 +20,66 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Unified Game Start Command (Fixed Markup)
+// Start Command with Game Buttons
 bot.start((ctx) => {
   ctx.reply(
-    `🎮 Welcome ${ctx.from.first_name}! Choose your mode:`,
+    `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`,
     Markup.inlineKeyboard([
       [
         Markup.button.game('🎯 Solo Play', 'GuessGm'),
-        Markup.button.game('👥 Play with Friends', 'GuessGm')
+        Markup.button.game('👥 Multiplayer', 'GuessGm')
       ]
-    ]).extra()
+    ])
   );
 });
 
-// Game Launch Handler (Improved Safety)
+// Game Launch Handler
 bot.on('callback_query', async (ctx) => {
   const { from, chat_instance } = ctx.callbackQuery;
-  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard?.[0]?.[0]?.text === '🎯 Solo Play';
+  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard?.[0]?.[0]?.text.includes('Solo');
   
-  const gameUrl = `https://g-game.vercel.app/?` +
-    `userId=${from.id}&` +
-    `chatId=${chat_instance}&` +
-    `userName=${encodeURIComponent(from.first_name)}&` +
-    `mode=${isSolo ? 'solo' : 'multi'}`;
+  // Construct game URL with parameters
+  const gameUrl = new URL('https://g-game.vercel.app/');
+  gameUrl.searchParams.set('userId', from.id);
+  gameUrl.searchParams.set('chatId', chat_instance);
+  gameUrl.searchParams.set('userName', from.first_name);
+  gameUrl.searchParams.set('mode', isSolo ? 'solo' : 'multi');
 
-  await ctx.answerGameQuery(gameUrl);
+  // Answer the game query
+  await ctx.answerGameQuery(gameUrl.toString());
 
-  // Send game confirmation (Fixed Markup)
+  // Send confirmation message
   await ctx.telegram.sendMessage(
     from.id,
-    isSolo ? `🎮 Solo game starting...` : `🎉 Game invite sent to chat!`,
+    isSolo ? `🎮 Starting solo adventure...` : `🎉 Inviting friends to play...`,
     Markup.inlineKeyboard([
       [Markup.button.game('🔄 Play Again', 'GuessGm')]
-    ]).extra()
+    ])
   );
 });
 
 // Inline Query Handler
-bot.on('inline_query', async (ctx) => {
-  return ctx.answerInlineQuery([{
+bot.on('inline_query', (ctx) => {
+  ctx.answerInlineQuery([{
     type: 'game',
     id: '1',
     game_short_name: 'GuessGm'
   }]);
 });
 
-// Webhook and Server Setup
+// Webhook Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
-    console.log("✅ Webhook set successfully");
+    console.log('✅ Webhook configured successfully');
   } catch (error) {
-    console.error("❌ Error setting webhook:", error);
+    console.error('❌ Webhook setup error:', error);
   }
 };
-setupWebhook();
 
+// Server Startup
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+app.listen(port, async () => {
+  await setupWebhook();
+  console.log(`🚀 Server running on port ${port}`);
+});
