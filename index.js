@@ -20,38 +20,29 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Interactive Start Command
+// Enhanced Start Command with Friend Selection
 bot.start((ctx) => {
-  const welcomeMessage = `👋 Hello ${ctx.from.first_name}! 💝 Ready to play a fun game with your beloved? Let's get started!`;
+  const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}! 💖\nPlay alone or challenge someone special:`;
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.callback('🎮 Play Now', 'play_game')],
-    [Markup.button.callback('💌 Share with Partner', 'share_game')]
+    [Markup.button.callback('🎯 Play Solo', 'play_solo')],
+    [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
   ctx.reply(welcomeMessage, keyboard);
 });
 
-// Play Game Handler
-bot.action('play_game', async (ctx) => {
+// Solo Play Handler
+bot.action('play_solo', async (ctx) => {
   await ctx.replyWithGame('GuessGm');
-  await ctx.reply(`💖 Share the fun with your beloved!`, 
+  await ctx.answerCbQuery();
+  await ctx.reply(
+    `❤️ Having fun? Share with someone special!`,
     Markup.inlineKeyboard([
-      Markup.button.callback('💌 Share Game', 'share_game')
+      Markup.button.switchToChat('👫 Challenge a Friend', 'GuessGm')
     ])
   );
-  await ctx.answerCbQuery();
 });
 
-// Share Game Handler
-bot.action('share_game', async (ctx) => {
-  const shareMessage = `💞 Spread the love! Click below to share GuessGm:`;
-  const shareButton = Markup.inlineKeyboard([
-    Markup.button.switchToCurrentChat('🔗 Share Game Now', 'GuessGm')
-  ]);
-  await ctx.reply(shareMessage, shareButton);
-  await ctx.answerCbQuery();
-});
-
-// Existing Game Features
+// Inline Game Handler (for friend selection)
 bot.on('inline_query', async (ctx) => {
   const game = {
     type: 'game',
@@ -61,23 +52,24 @@ bot.on('inline_query', async (ctx) => {
   return ctx.answerInlineQuery([game]);
 });
 
+// Game Launch Handler
 bot.on('callback_query', async (ctx) => {
   const { id, from, chat_instance } = ctx.callbackQuery;
   const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&chatId=${chat_instance}&userName=${from.first_name}`;
-
+  
   await ctx.answerGameQuery(gameUrl);
   
-  // Post-game sharing prompt
+  // Send confirmation to both players
   await ctx.telegram.sendMessage(
     from.id,
-    `🎉 Hope you enjoyed the game, ${from.first_name}! Share it with someone special!`,
+    `🎉 Game sent successfully! Waiting for your friend to join...`,
     Markup.inlineKeyboard([
-      Markup.button.callback('💌 Share Again', 'share_game')
+      Markup.button.url('🔗 Game Link', gameUrl)
     ])
   );
 });
 
-// Server Initialization
+// Webhook and Server Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
