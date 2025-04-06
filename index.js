@@ -22,18 +22,28 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
 
 // Start Command with PROPER GAME BUTTON
 bot.start(async (ctx) => {
+  // Only allow in private chats
   if (ctx.chat.type !== 'private') {
-    return ctx.reply('Please start the game from a private chat.');
+    return ctx.reply('❌ Please start the game in a private chat with the bot.');
   }
 
-  await ctx.reply('🎯 Ready to play solo?', Markup.inlineKeyboard([
-    [Markup.button.game('Play Solo')]
-  ]));
+  // Reply with solo play button
+  await ctx.reply(
+    `🎮 Welcome ${ctx.from.first_name}! Tap below to play solo:`,
+    Markup.inlineKeyboard([
+      [Markup.button.game('🎯 Play Solo')]
+    ])
+  );
 
-  await ctx.reply('👥 Or invite friends to play in a group:', Markup.inlineKeyboard([
-    [Markup.button.switchToChat('Invite Friends', 'GuessGm')]
-  ]));
+  // Reply separately with invite friends button
+  await ctx.reply(
+    '👥 Or invite your friends:',
+    Markup.inlineKeyboard([
+      [Markup.button.switchToChat('📨 Invite Friends', 'GuessGm')]
+    ])
+  );
 });
+
 
 // Unified Game Handler
 bot.on('callback_query', async (ctx) => {
