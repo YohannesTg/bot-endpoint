@@ -20,21 +20,22 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Enhanced Start Command
+// Start Command with PROPER GAME BUTTON
 bot.start((ctx) => {
   const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.game('🎯 Solo Play', 'GuessGm')], // Changed to game button
+    [Markup.button.game('🎯 Solo Play', 'GuessGm')], // <-- CORRECT SYNTAX
     [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
   ctx.reply(welcomeMessage, keyboard);
 });
 
-// Unified Game Query Handler for Solo and Multiplayer
+// Unified Game Handler
 bot.on('callback_query', async (ctx) => {
   if (ctx.callbackQuery.game_short_name === 'GuessGm') {
-    const { from, chat_instance, inline_message_id } = ctx.callbackQuery;
-    const mode = inline_message_id ? 'multi' : 'solo'; // Determine mode
+    const { from, chat_instance } = ctx.callbackQuery;
+    const mode = ctx.callbackQuery.inline_message_id ? 'multi' : 'solo';
+    
     const gameUrl = `https://g-game.vercel.app/?` +
       `userId=${from.id}&` +
       `chatId=${chat_instance}&` +
@@ -59,7 +60,7 @@ bot.on('inline_query', async (ctx) => {
   return ctx.answerInlineQuery(results);
 });
 
-// Webhook and Server Setup
+// Webhook Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
