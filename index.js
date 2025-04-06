@@ -24,59 +24,35 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
 bot.start((ctx) => {
   const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.callback('🎯 Solo Play', 'play_solo')],
+    [Markup.button.game('🎯 Solo Play', 'GuessGm')], // Changed to game button
     [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
   ctx.reply(welcomeMessage, keyboard);
 });
 
-// Solo Play Handler with User Parameters
-bot.action('play_solo', async (ctx) => {
-  const { from, chat_instance } = ctx.callbackQuery;
-  const gameUrl = `https://g-game.vercel.app/?` +
-    `userId=${from.id}&` +
-    `chatId=${chat_instance}&` +
-    `userName=${encodeURIComponent(from.first_name)}&` +
-    `mode=solo`;
-
-  // Edit message with proper game button
-  await ctx.editMessageText(
-    `🎮 Starting Solo Game for ${from.first_name}...`,
-    Markup.inlineKeyboard([
-      Markup.button.game('🚀 START GAME', 'GuessGm')
-    ])
-  );
-
-  // Answer the callback first
-  await ctx.answerCbQuery();
-  
-  // Answer the game query separately when game button is pressed
-  bot.on('callback_query', async (ctx) => {
-    if (ctx.callbackQuery.game_short_name === 'GuessGm') {
-      await ctx.answerGameQuery(gameUrl);
-    }
-  });
-});
-
-// Multiplayer Game Handler
+// Unified Game Query Handler for Solo and Multiplayer
 bot.on('callback_query', async (ctx) => {
   if (ctx.callbackQuery.game_short_name === 'GuessGm') {
-    const { from, chat_instance } = ctx.callbackQuery;
-    const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&chatId=${chat_instance}&userName=${encodeURIComponent(from.first_name)}`;
+    const { from, chat_instance, inline_message_id } = ctx.callbackQuery;
+    const mode = inline_message_id ? 'multi' : 'solo'; // Determine mode
+    const gameUrl = `https://g-game.vercel.app/?` +
+      `userId=${from.id}&` +
+      `chatId=${chat_instance}&` +
+      `userName=${encodeURIComponent(from.first_name)}&` +
+      `mode=${mode}`;
 
     await ctx.answerGameQuery(gameUrl);
-    
   }
 });
 
-// Inline Query Handler
+// Inline Query Handler (Multiplayer)
 bot.on('inline_query', async (ctx) => {
   const results = [{
     type: 'game',
     id: '1',
     game_short_name: 'GuessGm',
     reply_markup: Markup.inlineKeyboard([
-      Markup.button.url('🎮 Solo Play', `https://g-game.vercel.app/solo?userId=${ctx.from.id}&userName=${encodeURIComponent(ctx.from.first_name)}`)
+      Markup.button.game('🎮 Play Now', 'GuessGm')
     ])
   }];
   
