@@ -1,6 +1,5 @@
-const express = require('express');
-const { Telegraf } = require('telegraf');
-const { Markup } = require('telegraf');
+import express from 'express';
+import { Telegraf, Markup } from 'telegraf';
 
 const app = express();
 app.use(express.json());
