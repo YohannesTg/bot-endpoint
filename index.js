@@ -23,14 +23,18 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
 // Start Command with PROPER GAME BUTTON
 bot.start((ctx) => {
   const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
-  
-  const keyboard = Markup.inlineKeyboard([
-    [Markup.button.game('🎯 Solo Play')], // Make sure GuessGm is set via BotFather
-    [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
-  ]);
 
-  ctx.reply(welcomeMessage, keyboard);
+  // Send welcome message with solo play button
+  ctx.reply(welcomeMessage, Markup.inlineKeyboard([
+    [Markup.button.game('🎯 Solo Play')]
+  ]));
+
+  // Then send another message with the multiplayer invite button
+  ctx.reply('Or invite friends to play:', Markup.inlineKeyboard([
+    [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
+  ]));
 });
+
 
 // Unified Game Handler
 bot.on('callback_query', async (ctx) => {
