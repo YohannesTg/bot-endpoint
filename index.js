@@ -20,17 +20,16 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-
 // Unified Game Start Command (Fixed Markup)
 bot.start((ctx) => {
   ctx.reply(
     `🎮 Welcome ${ctx.from.first_name}! Choose your mode:`,
     Markup.inlineKeyboard([
-      
+      [
         Markup.button.game('🎯 Solo Play', 'GuessGm'),
         Markup.button.game('👥 Play with Friends', 'GuessGm')
-
-    ])
+      ]
+    ]).extra()
   );
 });
 
@@ -53,7 +52,7 @@ bot.on('callback_query', async (ctx) => {
     isSolo ? `🎮 Solo game starting...` : `🎉 Game invite sent to chat!`,
     Markup.inlineKeyboard([
       [Markup.button.game('🔄 Play Again', 'GuessGm')]
-    ])
+    ]).extra()
   );
 });
 
