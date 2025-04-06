@@ -8,7 +8,7 @@ const botToken = process.env.BOT_TOKEN;
 if (!botToken) throw new Error("Missing BOT_TOKEN");
 const bot = new Telegraf(botToken);
 
-// Webhook Setup
+// Webhook Configuration
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
 app.post(`/webhook/${botToken}`, async (req, res) => {
   try {
@@ -20,57 +20,84 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Start Command with Modern Style
+// Stylish Start Command
 bot.start((ctx) => {
-  const welcomeMessage = `🎉 Welcome, ${ctx.from.first_name}! Ready to challenge your friends in "Guess My Number"? 🧩 It's a fun multiplayer game where you guess numbers based on feedback! Choose your play mode below:`;
-
-  const keyboard = Markup.inlineKeyboard([
-    [Markup.button.callback('🎯 Play with Friends', 'play_friends')]
-  ]);
-
-  ctx.reply(welcomeMessage, keyboard);
+  ctx.replyWithSticker('CAACAgIAAxkBAAEL3NhmmdR6Q9VvAAE6QbQ7xq0p9VXbDosAAhUAA8A2TxMX-dh4AAIFSNA0MA')
+    .then(() => {
+      ctx.reply(
+        `🌟 *Hey ${ctx.from.first_name}!* 🌟\nReady for an epic challenge?`,
+        {
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.game('🚀 Launch Cosmic Challenge', 'GuessGm')],
+            [Markup.button.url('📊 Leaderboards', 'https://your-leaderboard-link.com')]
+          ])
+        }
+      );
+    });
 });
 
-// Play with Friends Handler
-bot.action('play_friends', async (ctx) => {
-  const { from } = ctx.callbackQuery;
-  const gameUrl = `https://g-game.vercel.app/?userId=${from.id}&userName=${encodeURIComponent(from.first_name)}`;
-
-  await ctx.editMessageText(
-    `🚀 Ready to guess, ${from.first_name}? Challenge your friends in "Guess My Number"! You will take turns guessing numbers. Each guess gives you feedback to help you narrow down the correct answer.\n\nTo send the game to your friends, use the button below!`,
-    Markup.inlineKeyboard([
-      [Markup.button.url('🎮 Share the Game', gameUrl)],
-      [Markup.button.callback('🔄 Challenge Again', 'play_friends')]
-    ])
-  );
-
-  await ctx.answerCbQuery();
-});
-
-// Inline Query Handler (Multiplayer)
-bot.on('inline_query', async (ctx) => {
-  const results = [{
-    type: 'game',
-    id: '1',
-    game_short_name: 'GuessGm', // Assuming 'GuessGm' is the game short name for your game
-    reply_markup: Markup.inlineKeyboard([
-      Markup.button.url('🎮 Play Now', `https://g-game.vercel.app/?userId=${ctx.from.id}&userName=${encodeURIComponent(ctx.from.first_name)}`)
-    ])
-  }];
+// Dynamic Game Handler
+bot.on('callback_query', async (ctx) => {
+  const { from, chat_instance } = ctx.callbackQuery;
   
-  return ctx.answerInlineQuery(results);
+  // Generate unique session ID
+  const sessionId = Math.random().toString(36).substr(2, 9);
+  const gameUrl = `https://g-game.vercel.app/?` +
+    `session=${sessionId}&` +
+    `uid=${from.id}&` +
+    `cid=${chat_instance}&` +
+    `uname=${encodeURIComponent(from.first_name)}&` +
+    `ref=TG`;
+
+  await ctx.answerGameQuery(gameUrl);
+
+  // Send animated confirmation
+  await ctx.telegram.sendMessage(
+    from.id,
+    `🎮 *Game Portal Activated!* 🕹️\n` +
+    `Prepare for liftoff, *${from.first_name}*!\n` +
+    `_Share the excitement below_ 👇`,
+    {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        [Markup.button.switchToChat('🔗 Invite Allies', 'CosmicGame')],
+        [Markup.button.url('🎮 Direct Access', gameUrl)]
+      ])
+    }
+  );
 });
 
-// Webhook and Server Setup
+// Inline Query Handler with Flair
+bot.on('inline_query', (ctx) => {
+  ctx.answerInlineQuery([
+    {
+      type: 'game',
+      id: 'cosmic_001',
+      game_short_name: 'CosmicGame',
+      title: '🚀 Cosmic Challenge',
+      description: 'Battle across the stars!',
+      photo_url: 'https://your-cdn.com/space-game-preview.jpg'
+    }
+  ], {
+    cache_time: 0,
+    is_personal: true
+  });
+});
+
+// Webhook Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
-    console.log("✅ Webhook set successfully");
+    console.log('🌌 Webhook Connected to Telegram Orbit');
   } catch (error) {
-    console.error("❌ Error setting webhook:", error);
+    console.error('⚠️ Cosmic Connection Failed:', error);
   }
 };
-setupWebhook();
 
+// Server Launch Sequence
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+app.listen(port, async () => {
+  await setupWebhook();
+  console.log(`🚀 Server warping through port ${port}`);
+});
