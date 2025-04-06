@@ -24,7 +24,7 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
 bot.start((ctx) => {
   const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.game('🎯 Solo Play', 'GuessGm')], // <-- CORRECT SYNTAX
+    [Markup.button.game('🎯 Solo Play', False)], // <-- CORRECT SYNTAX
     [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
   ctx.reply(welcomeMessage, keyboard);
