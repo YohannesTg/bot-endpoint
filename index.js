@@ -24,7 +24,7 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
 bot.start((ctx) => {
   const welcomeMessage = `🎮 Welcome ${ctx.from.first_name}!\nChoose your play mode:`;
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.game('🎯 Solo Play', {'GuessGm'})], // <-- CORRECT SYNTAX
+    [Markup.button.game('🎯 Solo Play', 'GuessGm')], // <-- CORRECT SYNTAX for solo play
     [Markup.button.switchToChat('👥 Play with Friends', 'GuessGm')]
   ]);
   ctx.reply(welcomeMessage, keyboard);
@@ -32,16 +32,21 @@ bot.start((ctx) => {
 
 // Unified Game Handler
 bot.on('callback_query', async (ctx) => {
-  if (ctx.callbackQuery.game_short_name === 'GuessGm') {
+  const { game_short_name } = ctx.callbackQuery;
+  
+  // Check if the game_short_name matches 'GuessGm' and handle accordingly
+  if (game_short_name === 'GuessGm') {
     const { from, chat_instance } = ctx.callbackQuery;
-    const mode = ctx.callbackQuery.inline_message_id ? 'multi' : 'solo';
+    const mode = ctx.callbackQuery.inline_message_id ? 'multi' : 'solo'; // Determine game mode
     
+    // Build the game URL dynamically based on the mode (solo or multiplayer)
     const gameUrl = `https://g-game.vercel.app/?` +
       `userId=${from.id}&` +
       `chatId=${chat_instance}&` +
       `userName=${encodeURIComponent(from.first_name)}&` +
       `mode=${mode}`;
-
+    
+    // Answer the game query with the generated URL
     await ctx.answerGameQuery(gameUrl);
   }
 });
@@ -57,6 +62,7 @@ bot.on('inline_query', async (ctx) => {
     ])
   }];
   
+  // Answer the inline query with the game
   return ctx.answerInlineQuery(results);
 });
 
