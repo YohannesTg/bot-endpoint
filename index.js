@@ -28,30 +28,32 @@ const gameUrls = {
     `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${encodeURIComponent(userName)}&mode=multi`
 };
 
-// Interactive Start Command
+// Updated Start Command with Proper Game Buttons
 bot.start((ctx) => {
-  ctx.reply(
-    `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.game('🎯 Solo Challenge'),
-        Markup.button.game('👥 Play with Partner')
-      ]
-    ])
+  // Send solo game with its own message context
+  ctx.replyWithGame(
+    'GuessGm', // Game short name configured via @BotFather
+    {
+      reply_markup: Markup.inlineKeyboard([
+        [Markup.button.game('🎯 Solo Challenge')], // Inherits game_short_name from parent message
+        [Markup.button.switchInline('👥 Invite Friends', 'multi_mode')] // Sharing trigger
+      ]).reply_markup,
+      caption: `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`
+    }
   );
 });
 
-// Unified Game Handler
+// Enhanced Game Query Handler
 bot.on('callback_query', async (ctx) => {
-  const { from, chat_instance } = ctx.callbackQuery;
-  const isSolo = ctx.callbackQuery.message?.reply_markup?.inline_keyboard?.[0]?.[0]?.text.includes('Solo');
+  const { from, message } = ctx.callbackQuery;
+  const isSolo = message?.game?.short_name === 'GuessGm'; // Direct game association check
 
-  const gameUrl = isSolo 
-    ? gameUrls.solo(from.id, chat_instance, from.first_name)
-    : gameUrls.multi(from.id, chat_instance, from.first_name);
+  const gameUrl = isSolo
+    ? gameUrls.solo(from.id, ctx.chat.id, from.first_name)
+    : gameUrls.multi(from.id, ctx.chat.id, from.first_name);
 
   await ctx.answerGameQuery(gameUrl);
-
+  
   await ctx.telegram.sendMessage(
     from.id,
     `${isSolo ? '🎮 Solo session' : '👥 Partner session'} started!`,
@@ -62,16 +64,18 @@ bot.on('callback_query', async (ctx) => {
   );
 });
 
-// Inline Query Handler
+// Updated Inline Query Handler for Multiplayer
 bot.on('inline_query', (ctx) => {
-  ctx.answerInlineQuery([{
-    type: 'game',
-    id: '1',
-    game_short_name: 'GuessGm',
-    reply_markup: Markup.inlineKeyboard([
-      Markup.button.url('🌟 Player Profile', `https://g-game.vercel.app/profile/${ctx.from.id}`)
-    ])
-  }]);
+  if (ctx.inlineQuery.query === 'multi_mode') {
+    ctx.answerInlineQuery([{
+      type: 'game',
+      id: 'multi_game',
+      game_short_name: 'GuessGm', // Same game but different URL params
+      reply_markup: Markup.inlineKeyboard([
+        Markup.button.url('👥 Team Profile', `https://g-game.vercel.app/team/${ctx.from.id}`)
+      ])
+    }]);
+  }
 });
 
 // Server Setup
