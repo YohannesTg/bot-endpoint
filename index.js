@@ -34,8 +34,8 @@ bot.start((ctx) => {
     `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`,
     Markup.inlineKeyboard([
       [
-        Markup.button.game('🎯 Solo Challenge', 'GuessGm'),
-        Markup.button.game('👥 Play with Partner', 'GuessGm')
+        Markup.button.game('🎯 Solo Challenge'),
+        Markup.button.game('👥 Play with Partner')
       ]
     ])
   );
