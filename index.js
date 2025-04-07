@@ -8,7 +8,7 @@ const botToken = process.env.BOT_TOKEN;
 if (!botToken) throw new Error("Missing BOT_TOKEN");
 const bot = new Telegraf(botToken);
 
-// Webhook Configuration
+// Webhook Setup
 const webhookUrl = `https://telegame.vercel.app/webhook/${botToken}`;
 app.post(`/webhook/${botToken}`, async (req, res) => {
   try {
@@ -20,15 +20,7 @@ app.post(`/webhook/${botToken}`, async (req, res) => {
   }
 });
 
-// Game Session Configuration
-const gameUrls = {
-  solo: (userId, chatId, userName) => 
-    `https://g-game.vercel.app/solo?userId=${userId}&chatId=${chatId}&userName=${encodeURIComponent(userName)}`,
-  multi: (userId, chatId, userName) =>
-    `https://g-game.vercel.app/?userId=${userId}&chatId=${chatId}&userName=${encodeURIComponent(userName)}&mode=multi`
-};
-
-// Updated Start Command with Proper Game Buttons
+// Start Command with PROPER GAME BUTTON
 bot.start((ctx) => {
   ctx.replyWithGame(
     'GuessGm',
@@ -36,60 +28,53 @@ bot.start((ctx) => {
       reply_markup: Markup.inlineKeyboard([
         [Markup.button.game('🎯 Solo Play')],
         // Fixed: Use switchToChat() instead of switchInline()
-        [Markup.button.switchToChat('👥 Invite Friends', 'multiplayer_mode')]
+        [Markup.button.switchToChat('👥 Play With Friends', 'GMN')]
       ]).reply_markup,
       caption: `🎮 Welcome ${ctx.from.first_name}!`
     }
   );
 });
 
-// Enhanced Game Query Handler
+// Unified Game Handler
 bot.on('callback_query', async (ctx) => {
-  const { from, message } = ctx.callbackQuery;
-  const isSolo = message?.game?.short_name === 'GuessGm'; // Direct game association check
+  if (ctx.callbackQuery.game_short_name === 'GuessGm') {
+    const { from, chat_instance } = ctx.callbackQuery;
+    const mode = ctx.callbackQuery.inline_message_id ? 'multi' : 'solo';
+    
+    const gameUrl = `https://g-game.vercel.app/?` +
+      `userId=${from.id}&` +
+      `chatId=${chat_instance}&` +
+      `userName=${encodeURIComponent(from.first_name)}&` +
+      `mode=${mode}`;
 
-  const gameUrl = isSolo
-    ? gameUrls.solo(from.id, ctx.chat.id, from.first_name)
-    : gameUrls.multi(from.id, ctx.chat.id, from.first_name);
-
-  await ctx.answerGameQuery(gameUrl);
-  
-  await ctx.telegram.sendMessage(
-    from.id,
-    `${isSolo ? '🎮 Solo session' : '👥 Partner session'} started!`,
-    Markup.inlineKeyboard([
-      [Markup.button.game('🔄 Play Again', 'GuessGm')],
-      [Markup.button.url('📊 View Progress', `https://g-game.vercel.app/stats/${from.id}`)]
-    ])
-  );
-});
-
-// Updated Inline Query Handler for Multiplayer
-bot.on('inline_query', (ctx) => {
-  if (ctx.inlineQuery.query === 'multi_mode') {
-    ctx.answerInlineQuery([{
-      type: 'game',
-      id: 'multi_game',
-      game_short_name: 'GuessGm', // Same game but different URL params
-      reply_markup: Markup.inlineKeyboard([
-        Markup.button.url('👥 Team Profile', `https://g-game.vercel.app/team/${ctx.from.id}`)
-      ])
-    }]);
+    await ctx.answerGameQuery(gameUrl);
   }
 });
 
-// Server Setup
+// Inline Query Handler (Multiplayer)
+bot.on('inline_query', async (ctx) => {
+  const results = [{
+    type: 'game',
+    id: '1',
+    game_short_name: 'GuessGm',
+    reply_markup: Markup.inlineKeyboard([
+      Markup.button.game('🎮 Play Now', 'GuessGm')
+    ])
+  }];
+  
+  return ctx.answerInlineQuery(results);
+});
+
+// Webhook Setup
 const setupWebhook = async () => {
   try {
     await bot.telegram.setWebhook(webhookUrl);
-    console.log('✅ Webhook configured:', webhookUrl);
+    console.log("✅ Webhook set successfully");
   } catch (error) {
-    console.error('❌ Webhook setup failed:', error);
+    console.error("❌ Error setting webhook:", error);
   }
 };
+setupWebhook();
 
 const port = process.env.PORT || 3000;
-app.listen(port, async () => {
-  await setupWebhook();
-  console.log(`🚀 Server running on port ${port}`);
-});
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
