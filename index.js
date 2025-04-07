@@ -30,15 +30,15 @@ const gameUrls = {
 
 // Updated Start Command with Proper Game Buttons
 bot.start((ctx) => {
-  // Send solo game with its own message context
   ctx.replyWithGame(
-    'GuessGm', // Game short name configured via @BotFather
+    'GuessGm',
     {
       reply_markup: Markup.inlineKeyboard([
-        [Markup.button.game('🎯 Solo Challenge')], // Inherits game_short_name from parent message
-        [Markup.button.switchInline('👥 Invite Friends', 'multi_mode')] // Sharing trigger
+        [Markup.button.game('🎯 Solo Play')],
+        // Fixed: Use switchToChat() instead of switchInline()
+        [Markup.button.switchToChat('👥 Invite Friends', 'multiplayer_mode')]
       ]).reply_markup,
-      caption: `🎮 Welcome ${ctx.from.first_name}! Choose your game mode:`
+      caption: `🎮 Welcome ${ctx.from.first_name}!`
     }
   );
 });
